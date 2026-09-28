@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "generator": "scripts/generate-panchang-data/index.mjs",
+  "generatorVersion": 1,
+  "engine": {
+    "id": "panchang-ts",
+    "version": "5.4.0",
+    "licence": "MIT"
+  },
+  "profile": {
+    "cityId": "ujjain",
+    "cityName": "Ujjain",
+    "coordinates": {
+      "latitude": 23.1765,
+      "longitude": 75.7885
+    },
+    "timezone": "Asia/Kolkata",
+    "timezoneOffsetMinutes": 330,
+    "monthSystem": "purnimanta",
+    "region": "all",
+    "ayanamsa": "lahiri",
+    "observanceRuleSet": "panchang-ts-5.4.0-default"
+  },
+  "dateStart": "2026-01-01",
+  "dateEnd": "2029-12-31",
+  "uniqueDateCount": 1461,
+  "monthFileCount": 48,
+  "reviewStatus": "provisional_unverified",
+  "releaseApproved": false,
+  "caveats": [
+    "Independent accuracy review pending",
+    "City-centre coordinates pending source audit",
+    "Festival rules and occurrences require independent review",
+    "Government holidays are not included"
+  ],
+  "files": [
+    {
+      "file": "2026/01.json",
+      "days": 31,
+      "sha256": "c400a56adba3e141fff47ff712302eb4ce4afa9222e36361ba9a2bc320897902"
+    },
+    {
+      "file": "2026/02.json",
+      "days": 28,
+      "sha256": "b740c299e3933adebb784dd540e9aa27665dd757f07130da54221dff935be579"
+    },
+    {
+      "file": "2026/03.json",
+      "days": 31,
+      "sha256": "d6e398ecfd7c1536fe96d2ccbbf02215fb50c34ab25756f46276e09448d0b98e"
+    },
+    {
+      "file": "2026/04.json",
+      "days": 30,
+      "sha256": "921cb1cc692de36c644daf509ce44f1f2cdb69ab1538de81638c5de292e80618"
+    },
+    {
+      "file": "2026/05.json",
+      "days": 31,
+      "sha256": "f812869fe82d9c7f8140d4a7f1f707ee5e34cbc83ecef3127a68480cb3e030c3"
+    },
+    {
+      "file": "2026/06.json",
+      "days": 30,
+      "sha256": "a81161de983eb580f3c14746450cd796690d2b1d70ce9152c01fa63177ec8e38"
+    },
+    {
+      "file": "2026/07.json",
+      "days": 31,
+      "sha256": "59f188429e3b05ed974970c73e1645fe6e51d71daef137aaf279cb8a9a6d55c4"
+    },
+    {
+      "file": "2026/08.json",
+      "days": 31,
+      "sha256": "e525458d657cdfd971213bd45494b676f31e8ca694f7ee6349c852b50bd9e359"
+    },
+    {
+      "file": "2026/09.json",
+      "days": 30,
+      "sha256": "8c7d2747f51c8daa11529f333a4de31e986b490ac2f448a33d7b1aa860273264"
+    },
+    {
+      "file": "2026/10.json",
+      "days": 31,
+      "sha256": "e79b74c553c8df96c9b126fff4d61637cce649eb1c6cdc8f20e26ccd535d884b"
+    },
+    {
+      "file": "2026/11.json",
+      "days": 30,
+      "sha256": "fd7f0df83a6184fb74372ecc679ce450b00353397628cfda891de08c143209eb"
+    },
+    {
+      "file": "2026/12.json",
+      "days": 31,
+      "sha256": "4be54e2f2636c40b63eda490eaa51516d37418d2e085f9adeaab0e9de1d52d21"
+    },
+    {
+      "file": "2027/01.json",
+      "days": 31,
+      "sha256": "4a8e9f2c82fcefd36865dacd3090e6a4e24ca1bb5e205d3ba1ca71eccb67eb3d"
+    },
+    {
+      "file": "2027/02.json",
+      "days": 28,
+      "sha256": "99ca8da3f2bb22a866b669c0d2f79dcccd6b14c44cd3ae063467338cf75b21b5"
+    },
+    {
+      "file": "2027/03.json",
+      "days": 31,
+      "sha256": "36ec3af0dd8f14f4c234a37aacf80435dbd04b6e1b8bfbb0da4eb899b05fe9e9"
+    },
+    {
+      "file": "2027/04.json",
+      "days": 30,
+      "sha256": "87159f2380b4479bbb37dbfd4cdabbeb3547a5ae0ba5e29532d617ef544f5137"
+    },
+    {
+      "file": "2027/05.json",
+      "days": 31,
+      "sha256": "2b7f39251bd403cca207a346767c6baa579f2f5543d3e6147e80472b3f40c7ff"
+    },
+    {
+      "file": "2027/06.json",
+      "days": 30,
+      "sha256": "841d1d8ee6ce2b1da0f36ce852e0403ff0ea0eced01897e1ee1d4fd7314fcf61"
+    },
+    {
+      "file": "2027/07.json",
+      "days": 31,
+      "sha256": "742ac1ccf41387fd0d80b69b2f0c7098bf5202420191170b556aef8bdde2670c"
+    },
+    {
+      "file": "2027/08.json",
+      "days": 31,
+      "sha256": "98796ed8458e5bebc0f7a38289ed1a430929abd8637fe721a7152e3309b29689"
+    },
+    {
+      "file": "2027/09.json",
+      "days": 30,
+      "sha256": "261371baac2cfd1bbd31148d63fe6ce257a18a7b0790a7338fc8ceb99ee0bccc"
+    },
+    {
+      "file": "2027/10.json",
+      "days": 31,
+      "sha256": "87b7c36a69aea9f09c5e916ee98cc52f42afce5d7087631d9681602712349b28"
+    },
+    {
+      "file": "2027/11.json",
+      "days": 30,
+      "sha256": "030c4984be495e2a376411fce15945040bf5cea8685d636cab8f8ea395cf7c5b"
+    },
+    {
+      "file": "2027/12.json",
+      "days": 31,
+      "sha256": "d9601d4b1e7e43e0b6754729accd5029d7180c4b35c862b5c5b0f1c5ab8241fa"
+    },
+    {
+      "file": "2028/01.json",
+      "days": 31,
+      "sha256": "705514618c7590b2a3b9aed36bd16f102c2ee6582e6ef500245ac0a958fb7d54"
+    },
+    {
+      "file": "2028/02.json",
+      "days": 29,
+      "sha256": "0f351297c228da976fc3e0b1a056cddda83936c000c7f47302dcd798f3e37975"
+    },
+    {
+      "file": "2028/03.json",
+      "days": 31,
+      "sha256": "0d63c148041f9b9e8bd438758ce040d1dd3bedf99a324ae29d1bddaa35db3182"
+    },
+    {
+      "file": "2028/04.json",
+      "days": 30,
+      "sha256": "1ec292b3b8e890c2d8a09e4037b61c23f19e80f3bb6bb92ebdc127fe51590098"
+    },
+    {
+      "file": "2028/05.json",
+      "days": 31,
+      "sha256": "bff07d8e29fceea1e112670c4ab1f9616fcc9e457c912e4a2cf11ec3c1ea8898"
+    },
+    {
+      "file": "2028/06.json",
+      "days": 30,
+      "sha256": "5098ac69812d97308d5074e6140b766687dc074d8f3ad9201958b7e08bc5c78d"
+    },
+    {
+      "file": "2028/07.json",
+      "days": 31,
+      "sha256": "059f268f97ca1b258bbb1f82be72c541c1dc51ffc66438e140170d6a39096a1b"
+    },
+    {
+      "file": "2028/08.json",
+      "days": 31,
+      "sha256": "8385df6a8d3538484f89698fd2a0266818056edcf656c329cd6f63c913d97b91"
+    },
+    {
+      "file": "2028/09.json",
+      "days": 30,
+      "sha256": "b9938ef494462d129e0a8982b4a2cc024e439875d4a512ff58db0e976215ece8"
+    },
+    {
+      "file": "2028/10.json",
+      "days": 31,
+      "sha256": "dc14be01e77b7665024470cee418ee304bd0d1f97768619ea748584b6fc4e044"
+    },
+    {
+      "file": "2028/11.json",
+      "days": 30,
+      "sha256": "7233d53f28f08e578bd9ef6aa90b9c0bc495c16a01c14a4d7a296615042bb56d"
+    },
+    {
+      "file": "2028/12.json",
+      "days": 31,
+      "sha256": "254a901a03a250c9cbe8a38c5b24c2f66390e41102dc8ba7744fc66e29f9b865"
+    },
+    {
+      "file": "2029/01.json",
+      "days": 31,
+      "sha256": "911cfbc65641824cbcf9d38f0e21c3a470ea7da09afc48f04d713ce4386653c8"
+    },
+    {
+      "file": "2029/02.json",
+      "days": 28,
+      "sha256": "46b0c8338817351010fce2ce9601c13761ef7b88f012e75f94e4df15493c0205"
+    },
+    {
+      "file": "2029/03.json",
+      "days": 31,
+      "sha256": "e54732c9c41cc57725a7b1313a2075d6a2c69c7031f47b936719d1ce22852267"
+    },
+    {
+      "file": "2029/04.json",
+      "days": 30,
+      "sha256": "57718ab59506bb975ba7b5edb3c5ee64c5ba01309927a7362b3b36f7e8f22f24"
+    },
+    {
+      "file": "2029/05.json",
+      "days": 31,
+      "sha256": "b835164739b8115fa339f3458c0dbdce321856db836f5d1449faca6ed44adb31"
+    },
+    {
+      "file": "2029/06.json",
+      "days": 30,
+      "sha256": "01b335e344343e85ceecac27fe4042ca2ac9a20d7d73e0812c6048a299d07237"
+    },
+    {
+      "file": "2029/07.json",
+      "days": 31,
+      "sha256": "21ac2818f4c0cde7805d098d54d729d634feafad40c40f44c916ff7871243611"
+    },
+    {
+      "file": "2029/08.json",
+      "days": 31,
+      "sha256": "94cf7eea85405d6480677572019080a56a917492f52ce4286d35aa6a40092871"
+    },
+    {
+      "file": "2029/09.json",
+      "days": 30,
+      "sha256": "a4a80c1da5d7d9d30bf08e598baea9259ef055846fa1d9fc225bfe28e3938234"
+    },
+    {
+      "file": "2029/10.json",
+      "days": 31,
+      "sha256": "629173cd99a0f939974d44aa96600bac17bf46fe04d6ac5161b72277c8fd41d0"
+    },
+    {
+      "file": "2029/11.json",
+      "days": 30,
+      "sha256": "8ecb61a08385fdd31f459c391cfa260adc81b0086c9da82316777e8ebd163930"
+    },
+    {
+      "file": "2029/12.json",
+      "days": 31,
+      "sha256": "fae1472417cb8bbe39a3e960b0e8bd9bf1f73c2ac42d38b0b67eff7a4770e0f1"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "task": "Complete and review Hindu Calendar master plan",
+  "date": "2026-09-27",
+  "status": "implementation_in_progress",
+  "implementationApproved": true,
+  "masterPlan": "HINDU_CALENDAR_CODEX_MASTER_PROMPT.md",
+  "originalArchive": ".codex/mahi-team/planning/source-master-prompt.md",
+  "userDecisions": {
+    "dataBudget": "free_sources_only",
+    "convention": "broadest_verified_available"
+  },
+  "pendingProductQuestions": [],
+  "pendingAuthorization": null,
+  "sourceDataFeasibility": "Unverified; Phase 1 gate, no paid fallback",
+  "validation": {
+    "sections": 29,
+    "originalSectionsMapped": 109,
+    "codeFencesBalanced": true,
+    "applicationTests": "not_applicable_documentation_only",
+    "independentReview": "Complete; two findings corrected: stable semantic profile identity and pre-filled date reminder action"
+  },
+  "planSha256": "84010314cf60d4034fb005f5179f3b2d849caf5177c8dfd7c44c2520596b1cb4",
+  "approval": "User said yes start in conversation",
+  "currentPhase": "1_research_and_feasibility"
+}

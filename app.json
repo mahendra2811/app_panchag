@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Hindu Calendar - Panchang",
+    "slug": "hindu-calendar-panchang",
+    "platforms": ["android"],
+    "scheme": "hinducalendar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFF8EC"
+    },
+    "android": {
+      "package": "com.pooniya.hinducalendar",
+      "versionCode": 1,
+      "allowBackup": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#FFF8EC"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-notifications",
+      ["expo-localization", { "supportedLocales": { "android": ["en", "hi"], "ios": ["en", "hi"] } }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
