@@ -4,7 +4,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { formatCivilDate, getMonthGrid, parseCivilDate } from '@/domain/calendar';
-import { localizeDigits, MONTH_NAMES, WEEKDAY_NAMES } from '@/i18n';
+import { localizeDigits, MONTH_NAMES, WEEKDAY_SHORT_NAMES } from '@/i18n';
 import { usePreferences } from '@/store/preferences';
 import { colors, minimumTouchTarget, radius, spacing } from '@/theme';
 import { AppText, Button, IconButton } from '@/components/ui';
@@ -47,7 +47,7 @@ export function DatePickerField({ date, label, placeholder, fallbackDate, onSele
     onSelect(next);
   }
 
-  const weekdays = WEEKDAY_NAMES[language];
+  const weekdays = WEEKDAY_SHORT_NAMES[language];
   const heading = step === 'year' ? t('chooseYear') : step === 'month' ? t('chooseMonth') : t('chooseDate');
 
   return (
@@ -107,7 +107,7 @@ export function DatePickerField({ date, label, placeholder, fallbackDate, onSele
                   <View style={styles.grid}>
                     {Array.from({ length: 7 }, (_, index) => (
                       <View key={index} style={styles.dayCell}>
-                        <AppText variant="small" tone="muted" align="center" numberOfLines={1}>{weekdays[(index + weekStart) % 7]?.slice(0, language === 'hi' ? 2 : 3)}</AppText>
+                        <AppText variant="small" tone="muted" align="center" numberOfLines={1}>{weekdays[(index + weekStart) % 7]}</AppText>
                       </View>
                     ))}
                     {getMonthGrid(year, month, weekStart).weeks.flat().map((cell, index) => (

@@ -1,5 +1,7 @@
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { APP_LANGUAGES, intlLocale, type AppLanguage } from './languages';
+import { regionalTranslations } from './regional';
 
 const i18n = createInstance();
 
@@ -140,6 +142,7 @@ const en = {
   never: 'Never',
   previewOccurrences: 'Next occurrences',
   notification: 'Notification',
+  reminderNotificationBody: 'Your calendar reminder',
   notifications: 'Notifications',
   enableNotifications: 'Enable notifications',
   notificationHint: 'Alerts are scheduled on this device. Delivery depends on Android settings.',
@@ -188,8 +191,6 @@ const en = {
   chooseDate: 'Choose date',
   chooseMonth: 'Choose month',
   chooseYear: 'Choose year',
-  calculationUnverified:
-    'Calculated locally; individual dates have not been independently reviewed.',
   officialHolidayUnavailable: 'No official holiday notice is bundled for this year and region.',
   daySegment: 'Day',
   nightSegment: 'Night',
@@ -390,6 +391,7 @@ const hi: typeof en = {
   never: 'कभी नहीं',
   previewOccurrences: 'अगली तारीखें',
   notification: 'सूचना',
+  reminderNotificationBody: 'आपका कैलेंडर रिमाइंडर',
   notifications: 'सूचनाएँ',
   enableNotifications: 'सूचनाएँ चालू करें',
   notificationHint: 'सूचनाएँ इसी फ़ोन पर तय होती हैं। उनका पहुँचना Android सेटिंग पर निर्भर है।',
@@ -438,7 +440,6 @@ const hi: typeof en = {
   chooseDate: 'तारीख चुनें',
   chooseMonth: 'महीना चुनें',
   chooseYear: 'वर्ष चुनें',
-  calculationUnverified: 'गणना इसी फ़ोन पर हुई है; हर तारीख की अलग से स्वतंत्र जाँच नहीं हुई है।',
   officialHolidayUnavailable: 'इस वर्ष और क्षेत्र की आधिकारिक छुट्टी सूचना ऐप में उपलब्ध नहीं है।',
   daySegment: 'दिन',
   nightSegment: 'रात',
@@ -503,14 +504,17 @@ const hi: typeof en = {
 };
 
 i18n.use(initReactI18next).init({
-  resources: { en: { translation: en }, hi: { translation: hi } },
+  resources: {
+    en: { translation: en }, hi: { translation: hi },
+    ...Object.fromEntries(Object.entries(regionalTranslations).map(([code, translation]) => [code, { translation }])),
+  },
   lng: 'en',
-  fallbackLng: 'en',
+  fallbackLng: ['en', 'hi'],
   interpolation: { escapeValue: false },
   react: { useSuspense: false },
 });
 
-export const MONTH_NAMES = {
+const baseMonths = {
   en: [
     'January',
     'February',
@@ -541,14 +545,42 @@ export const MONTH_NAMES = {
   ],
 };
 
-export const WEEKDAY_NAMES = {
+const baseWeekdays = {
   en: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
   hi: ['रविवार', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार'],
 };
 
+function calendarNames(language: AppLanguage, unit: 'month' | 'weekday', width: 'long' | 'short' = 'long'): string[] {
+  const locale = intlLocale(language);
+  try {
+    const formatter = new Intl.DateTimeFormat(locale, { timeZone: 'UTC', [unit]: width });
+    const count = unit === 'month' ? 12 : 7;
+    const names = Array.from({ length: count }, (_, index) => {
+      const date = unit === 'month' ? new Date(Date.UTC(2024, index, 1)) : new Date(Date.UTC(2024, 8, index + 1));
+      return formatter.format(date);
+    });
+    return names.every(Boolean) ? names : unit === 'month' ? baseMonths.en : baseWeekdays.en;
+  } catch {
+    return unit === 'month' ? baseMonths.en : baseWeekdays.en;
+  }
+}
+
+export const MONTH_NAMES: Record<AppLanguage, string[]> = Object.fromEntries(APP_LANGUAGES.map(({ code }) => [
+  code, code === 'en' || code === 'hi' ? baseMonths[code] : calendarNames(code, 'month'),
+])) as Record<AppLanguage, string[]>;
+
+export const WEEKDAY_NAMES: Record<AppLanguage, string[]> = Object.fromEntries(APP_LANGUAGES.map(({ code }) => [
+  code, code === 'en' || code === 'hi' ? baseWeekdays[code] : calendarNames(code, 'weekday'),
+])) as Record<AppLanguage, string[]>;
+
+export const WEEKDAY_SHORT_NAMES: Record<AppLanguage, string[]> = Object.fromEntries(APP_LANGUAGES.map(({ code }) => [
+  code, code === 'hi' ? ['रवि', 'सोम', 'मंगल', 'बुध', 'गुरु', 'शुक्र', 'शनि'] : code === 'en'
+    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : calendarNames(code, 'weekday', 'short'),
+])) as Record<AppLanguage, string[]>;
+
 export function localizeDigits(
   value: string | number,
-  language: 'hi' | 'en',
+  language: AppLanguage,
   devanagari: boolean,
 ): string {
   const input = String(value);

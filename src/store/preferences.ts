@@ -2,8 +2,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { isAppLanguage, type AppLanguage } from '@/i18n/languages';
 
-export type AppLanguage = 'hi' | 'en';
+export type { AppLanguage } from '@/i18n/languages';
 export type HomeView = 'month' | 'week' | 'today';
 export type MonthSystem = 'purnimanta' | 'amanta';
 export type TextSize = 'small' | 'default' | 'large' | 'extraLarge';
@@ -34,7 +35,8 @@ export interface PreferencesState {
   setHydrated: () => void;
 }
 
-const initialLanguage: AppLanguage = getLocales()[0]?.languageCode === 'hi' ? 'hi' : 'en';
+const deviceLanguage = getLocales()[0]?.languageCode;
+const initialLanguage: AppLanguage = isAppLanguage(deviceLanguage) ? deviceLanguage : 'en';
 
 export const usePreferences = create<PreferencesState>()(
   persist(

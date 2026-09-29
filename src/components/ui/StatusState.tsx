@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, View } from 'react-native';
 import { colors, spacing } from '@/theme';
 import { AppText } from './AppText';
 import { Button } from './Button';
@@ -26,10 +26,14 @@ export function StatusState({ title, description, icon, actionLabel, onAction }:
 export function LoadingState({ label }: { label: string }) {
   return (
     <View style={styles.container} accessibilityRole="progressbar" accessibilityLabel={label}>
+      <Image source={require('../../../assets/images/logo_without_background.png')} style={styles.loadingMark} resizeMode="contain" accessibilityIgnoresInvertColors />
       <ActivityIndicator color={colors.primary} />
-      <AppText tone="muted" align="center">{label}</AppText>
+      <AppText variant="small" tone="muted" align="center">{label}</AppText>
     </View>
   );
 }
 
-const styles = StyleSheet.create({ container: { minHeight: 176, justifyContent: 'center', alignItems: 'center', gap: spacing.md, padding: spacing.xl } });
+const styles = StyleSheet.create({
+  container: { minHeight: 176, justifyContent: 'center', alignItems: 'center', gap: spacing.md, padding: spacing.xl },
+  loadingMark: { width: 62, height: 62 },
+});

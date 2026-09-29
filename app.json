@@ -6,26 +6,35 @@
     "scheme": "hinducalendar",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/panchag-loog-new.png",
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/images/logo_without_background.png",
       "resizeMode": "contain",
       "backgroundColor": "#FFF8EC"
+    },
+    "web": {
+      "favicon": "./assets/images/panchag-loog-new.png"
     },
     "android": {
       "package": "com.pooniya.hinducalendar",
       "versionCode": 1,
       "allowBackup": false,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "foregroundImage": "./assets/images/logo_without_background.png",
         "backgroundColor": "#FFF8EC"
       }
     },
     "plugins": [
       "expo-router",
+      ["expo-splash-screen", {
+        "image": "./assets/images/logo_without_background.png",
+        "imageWidth": 180,
+        "resizeMode": "contain",
+        "backgroundColor": "#FFF8EC"
+      }],
       "expo-sqlite",
       "expo-notifications",
-      ["expo-localization", { "supportedLocales": { "android": ["en", "hi"], "ios": ["en", "hi"] } }]
+      ["expo-localization", { "supportedLocales": { "android": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"], "ios": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"] } }]
     ],
     "experiments": {
       "typedRoutes": true

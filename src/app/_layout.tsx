@@ -1,8 +1,8 @@
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
-import { useEffect } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, ImageBackground, StyleSheet, View } from 'react-native';
 
 import { getReminder } from '@/features/reminders/repository';
 import i18n from '@/i18n';
@@ -14,6 +14,12 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const { language, hydrated, onboardingComplete, notificationsEnabled, textSize } = usePreferences();
+  const [brandIntroReady, setBrandIntroReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setBrandIntroReady(true), 550);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     void i18n.changeLanguage(language);
@@ -56,11 +62,19 @@ export default function RootLayout() {
     <TextScaleProvider value={textSize}>
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }} />
-      {!hydrated && <View style={styles.loading}><ActivityIndicator color="#A83E0C" size="large" /></View>}
+      {(!hydrated || !brandIntroReady) && (
+        <View style={styles.loading} accessibilityRole="progressbar" accessibilityLabel={i18n.t('loading')}>
+          <ImageBackground source={require('../../assets/images/mobile view logo_and_name.png')} resizeMode="cover" style={styles.loadingArtwork}>
+            <View style={styles.loadingIndicator}><ActivityIndicator color="#A83E0C" size="small" /></View>
+          </ImageBackground>
+        </View>
+      )}
     </TextScaleProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  loading: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: '#FFF8EC', alignItems: 'center', justifyContent: 'center' },
+  loading: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: '#FFF8EC' },
+  loadingArtwork: { flex: 1, justifyContent: 'flex-end', alignItems: 'center' },
+  loadingIndicator: { marginBottom: 40, padding: 12, borderRadius: 999, backgroundColor: 'rgba(255,248,236,0.9)' },
 });

@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import { useRouter } from 'expo-router';
+import { Image, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { AppText, Card } from '@/components/ui';
 import { MenuRow, Page } from '@/features/common/Page';
@@ -12,7 +13,7 @@ export default function AboutScreen() {
   return (
     <Page title={t('about')}>
       <Card style={{ gap: spacing.sm }}>
-        <AppText variant="title" weight="700">{t('appName')}</AppText>
+        <Image source={require('../../../assets/images/logo_with_name_without_backgro.png')} style={styles.wordmark} resizeMode="contain" accessibilityLabel={t('appName')} />
         <AppText tone="muted">{t('aboutDescription')}</AppText>
         <AppText variant="small" tone="muted">{t('version')} {version}</AppText>
       </Card>
@@ -22,3 +23,7 @@ export default function AboutScreen() {
     </Page>
   );
 }
+
+const styles = StyleSheet.create({
+  wordmark: { width: '100%', height: 105 },
+});

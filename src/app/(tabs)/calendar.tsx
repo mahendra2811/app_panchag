@@ -6,14 +6,15 @@ import { useTranslation } from 'react-i18next';
 import { AgendaDayList, CalendarHeader, DatePickerField, MonthGrid, MonthYearPicker } from '@/components/calendar';
 import type { CalendarDayData } from '@/components/calendar';
 import { AppText, Button, Card, Screen, SectionHeader } from '@/components/ui';
-import { SourceBadge } from '@/components/panchang';
 import { getCityById } from '@/data/cities';
 import { formatCivilDate, getMonthGrid, parseCivilDate } from '@/domain/calendar';
-import { dateLabel, monthLabel } from '@/features/calendar/format';
+import { compactTithiParts, dateLabel, monthLabel } from '@/features/calendar/format';
+import { useCalendarDatePress } from '@/features/calendar/useCalendarDatePress';
 import { useMonthSummary } from '@/features/calendar/useMonthSummary';
 import { useToday } from '@/features/calendar/useToday';
 import { usePanchangProfile } from '@/features/panchang/usePanchang';
-import { localizeDigits, MONTH_NAMES, WEEKDAY_NAMES } from '@/i18n';
+import { localizeDigits, MONTH_NAMES, WEEKDAY_SHORT_NAMES } from '@/i18n';
+import { localizeMasa, localizeTithi } from '@/i18n/panchang';
 import { usePreferences } from '@/store/preferences';
 import { spacing } from '@/theme';
 
@@ -32,16 +33,21 @@ export default function CalendarScreen() {
 
   const markers = useMemo(() => {
     const next: Record<string, CalendarDayData> = {};
-    for (const [date, day] of Object.entries(days)) next[date] = {
-      tithi: day.summaryAtSunrise.tithiName ?? undefined,
-      eventLabel: day.observances[0]?.name,
-      eventCount: day.observances.length,
-      nakshatra: day.limbs.nakshatra.find((entry) => entry.isActiveAtSunrise)?.name,
-    };
+    for (const [date, day] of Object.entries(days)) {
+      const tithi = compactTithiParts(day.summaryAtSunrise, language, devanagariDigits);
+      next[date] = {
+        tithi: tithi?.label,
+        tithiFirstLine: tithi?.firstLine,
+        tithiSecondLine: tithi?.secondLine,
+        eventLabel: day.observances[0]?.name,
+        eventCount: day.observances.length,
+        nakshatra: day.limbs.nakshatra.find((entry) => entry.isActiveAtSunrise)?.name,
+      };
+    }
     return next;
-  }, [days]);
+  }, [days, language, devanagariDigits]);
 
-  const weekdays = WEEKDAY_NAMES[language].map((name) => name.slice(0, language === 'hi' ? 2 : 3));
+  const weekdays = WEEKDAY_SHORT_NAMES[language];
   const selected = days[selectedDate];
 
   function choose(date: string) {
@@ -49,6 +55,8 @@ export default function CalendarScreen() {
     if (!parts) return;
     setSelectedDate(date); setYear(parts.year); setMonth(parts.month);
   }
+
+  const pressCalendarDate = useCalendarDatePress(choose, (date) => router.push(`/date/${date}`));
 
   function move(delta: -1 | 1) {
     const absolute = year * 12 + month - 1 + delta;
@@ -73,19 +81,17 @@ export default function CalendarScreen() {
       {textSize === 'extraLarge' ? (
         <AgendaDayList days={getMonthGrid(year, month, weekStart).weeks.flat().filter((cell) => cell.inMonth && cell.date).map((cell) => ({
           date: cell.date!, dateLabel: dateLabel(cell.date!, language, devanagariDigits), data: markers[cell.date!], isToday: cell.date === today, isSelected: cell.date === selectedDate,
-        }))} todayLabel={t('today')} onSelectDate={choose} />
+        }))} todayLabel={t('today')} onSelectDate={pressCalendarDate} />
       ) : (
         <MonthGrid year={year} month={month} weekStart={weekStart} weekdayLabels={weekdays} formatDay={(day) => localizeDigits(day, language, devanagariDigits)} selectedDate={selectedDate}
-          todayDate={today} todayLabel={t('today')} days={markers} density={simpleMode ? 'simple' : 'detailed'} onSelectDate={choose} />
+          todayDate={today} todayLabel={t('today')} days={markers} density={simpleMode ? 'simple' : 'detailed'} onSelectDate={pressCalendarDate} />
       )}
 
       {loading && <AppText tone="muted" variant="small">{t('loading')} {loadedCount}/{totalCount}</AppText>}
       {!city && <Button title={t('selectCity')} variant="secondary" onPress={() => router.push('/settings/location')} />}
-      {/* {city && <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t(city.kind === 'district' ? 'districtApproximation' : 'calculationUnverified')} />} */}
-
       <Card style={styles.summary}>
         <SectionHeader title={t('selectedDay')} subtitle={dateLabel(selectedDate, language, devanagariDigits)} />
-        {selected ? <AppText tone="primary">{[selected.summaryAtSunrise.masaName, selected.summaryAtSunrise.tithiName].filter(Boolean).join(' · ')}</AppText>
+        {selected ? <AppText tone="primary">{[localizeMasa(selected.summaryAtSunrise.masaId, selected.summaryAtSunrise.masaName, language), localizeTithi(selected.summaryAtSunrise.tithiId, selected.summaryAtSunrise.pakshaId, selected.summaryAtSunrise.tithiName, language)].filter(Boolean).join(' · ')}</AppText>
           : <AppText tone="muted">{city ? t('dataUnavailable') : t('locationNeeded')}</AppText>}
         <Button title={t('dayDetails')} onPress={() => router.push(`/date/${selectedDate}`)} fullWidth />
       </Card>

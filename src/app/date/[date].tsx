@@ -4,13 +4,14 @@ import { Alert, StyleSheet, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AppText, Button, Card, SectionHeader, StatusState } from '@/components/ui';
-import { PanchangSection, SourceBadge, TimeRangeRow } from '@/components/panchang';
+import { PanchangSection, TimeRangeRow } from '@/components/panchang';
 import { getCityById } from '@/data/cities';
 import { isValidCivilDate } from '@/domain/calendar';
 import { clockLabel, dateLabel } from '@/features/calendar/format';
 import { Page } from '@/features/common/Page';
 import { deleteNote, listNotes, listOccurrences, saveNote, type DateNote, type ReminderOccurrence } from '@/features/reminders/repository';
 import { usePanchangDay } from '@/features/panchang/usePanchang';
+import { adhikaMasaLabel, localizeMasa, localizeTithi, pakshaLabel } from '@/i18n/panchang';
 import { usePreferences } from '@/store/preferences';
 import { colors, radius, spacing } from '@/theme';
 
@@ -71,18 +72,15 @@ export default function DateDetailScreen() {
 
   return (
     <Page title={t('dayDetails')} subtitle={dateLabel(date, language, devanagariDigits)}>
-      {/* {city ? <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t('calculationUnverified')} tone="warning" />
-        : <Button title={t('selectCity')} onPress={() => router.push('/settings/location')} />} */}
-
       {loading && <AppText tone="muted">{t('loading')}</AppText>}
       {!loading && result && result.status !== 'available' && <StatusState title={t(result.status === 'outside_coverage' ? 'outsideCoverage' : 'dataUnavailable')} description={result.reason} />}
 
       {day && (
         <>
           <Card style={styles.summary}>
-            <AppText variant="title" weight="700">{[summary?.masaName, summary?.tithiName].filter(Boolean).join(' · ')}</AppText>
-            <AppText tone="muted">{summary?.pakshaId === 'SHUKLA' ? (language === 'hi' ? 'शुक्ल पक्ष' : 'Shukla Paksha') : summary?.pakshaId === 'KRISHNA' ? (language === 'hi' ? 'कृष्ण पक्ष' : 'Krishna Paksha') : ''}</AppText>
-            {summary?.isAdhika && <AppText tone="primary">{language === 'hi' ? 'अधिक मास' : 'Adhika Masa'}</AppText>}
+            <AppText variant="title" weight="700">{[localizeMasa(summary?.masaId, summary?.masaName, language), localizeTithi(summary?.tithiId, summary?.pakshaId ?? null, summary?.tithiName, language)].filter(Boolean).join(' · ')}</AppText>
+            <AppText tone="muted">{pakshaLabel(summary?.pakshaId ?? null, language)}</AppText>
+            {summary?.isAdhika && <AppText tone="primary">{adhikaMasaLabel(language)}</AppText>}
             {summary?.vikramSamvat && <AppText variant="small" tone="muted">{t('samvat')} {summary.vikramSamvat}</AppText>}
           </Card>
 
@@ -90,7 +88,7 @@ export default function DateDetailScreen() {
           <PanchangSection title={t('vara')}><TimeRangeRow label={t('vara')} value={limbs?.varaName} /></PanchangSection>
           {sections.map(({ key, rows }) => (
             <PanchangSection key={key} title={t(key)} unavailableLabel={t('notSupported')}>
-              {rows?.map((entry) => <TimeRangeRow key={`${entry.id}:${entry.startsAt}`} label={entry.name}
+              {rows?.map((entry) => <TimeRangeRow key={`${entry.id}:${entry.startsAt}`} label={key === 'tithi' ? localizeTithi(entry.id, entry.paksha ?? null, entry.name, language) : entry.name}
                 start={clockLabel(entry.startsLocal)} end={clockLabel(entry.endsLocal)}
                 context={entry.isActiveAtSunrise ? t('sunrise') : undefined} />)}
             </PanchangSection>
@@ -121,7 +119,7 @@ export default function DateDetailScreen() {
       </Card>) : <AppText tone="muted">{t('noReminders')}</AppText>}
 
       <SectionHeader title={t('notesForDate')} />
-      <TextInput value={noteText} onChangeText={setNoteText} multiline maxLength={5000} style={styles.noteInput}
+      <TextInput value={noteText} onChangeText={setNoteText} multiline maxLength={5000} style={[styles.noteInput, language === 'ur' && styles.rtlInput]}
         placeholder={t('notesForDate')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('notesForDate')} />
       <View style={styles.noteActions}>
         {notes.length > 0 && <Button title={t('deleteNote')} variant="danger" onPress={removePersonalNote} />}
@@ -135,5 +133,6 @@ export default function DateDetailScreen() {
 const styles = StyleSheet.create({
   summary: { gap: spacing.sm },
   noteInput: { minHeight: 120, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: radius.md, textAlignVertical: 'top', padding: spacing.md, color: colors.text, fontSize: 16 },
+  rtlInput: { textAlign: 'right', writingDirection: 'rtl' },
   noteActions: { flexDirection: 'row', justifyContent: 'flex-end', flexWrap: 'wrap', gap: spacing.sm },
 });

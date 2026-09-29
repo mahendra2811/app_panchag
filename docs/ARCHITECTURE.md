@@ -6,7 +6,7 @@
 
 ## Product boundaries
 
-Android React Native application with Expo Router, strict TypeScript, four tabs, on-device reminders/notes, and no account or analytics service. Gregorian date navigation is independent of Panchang availability. Hindi and English are launch languages. Exactly one source/profile computes the astronomical and observance fields of a given Panchang record. Government holidays and personal items are separately attributed layers.
+Android React Native application with Expo Router, strict TypeScript, four tabs, on-device reminders/notes, and no account or analytics service. Gregorian date navigation is independent of Panchang availability. The app supports English, Hindi, and ten additional Indian languages; untranslated strings fall back through English, then Hindi. Exactly one source/profile computes the astronomical and observance fields of a given Panchang record. Government holidays and personal items are separately attributed layers.
 
 ```mermaid
 flowchart TD

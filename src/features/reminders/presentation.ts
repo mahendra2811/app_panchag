@@ -1,6 +1,7 @@
 import { addCivilDays, isCivilDate, occurrenceDates } from '@/domain/recurrence';
 import type { CivilDate, RecurrenceRule } from '@/domain/recurrence';
 import type { Reminder } from './types';
+import { intlLocale, type AppLanguage } from '@/i18n/languages';
 
 export function deviceCivilDate(): CivilDate {
   const now = new Date();
@@ -11,9 +12,9 @@ export function deviceTimeZone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
 }
 
-export function formatReminderDate(date: CivilDate, language: 'hi' | 'en', time?: string | null): string {
+export function formatReminderDate(date: CivilDate, language: AppLanguage, time?: string | null): string {
   if (!isCivilDate(date)) return date;
-  const formatted = new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN' : 'en-IN', {
+  const formatted = new Intl.DateTimeFormat(intlLocale(language), {
     day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
   }).format(new Date(`${date}T12:00:00Z`));
   return time ? `${formatted} · ${time}` : formatted;

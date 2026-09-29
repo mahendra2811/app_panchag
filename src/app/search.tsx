@@ -42,7 +42,7 @@ export default function SearchScreen() {
   return (
     <Page title={t('search')} subtitle={t('searchPlaceholder')}>
       <TextInput value={query} onChangeText={setQuery} placeholder={t('searchPlaceholder')}
-        placeholderTextColor={colors.mutedLight} style={styles.input} autoFocus accessibilityLabel={t('search')} />
+        placeholderTextColor={colors.mutedLight} style={[styles.input, language === 'ur' && styles.rtlInput]} autoFocus accessibilityLabel={t('search')} />
       {isValidCivilDate(dateQuery) && <Card onPress={() => router.push(`/date/${dateQuery}`)}>
         <AppText weight="700">{dateLabel(dateQuery, language, devanagariDigits)}</AppText>
         <AppText variant="small" tone="primary">{t('dayDetails')}</AppText>
@@ -67,4 +67,5 @@ export default function SearchScreen() {
 
 const styles = StyleSheet.create({
   input: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: radius.md, minHeight: 52, paddingHorizontal: spacing.md, fontSize: 16, color: colors.text },
+  rtlInput: { textAlign: 'right', writingDirection: 'rtl' },
 });

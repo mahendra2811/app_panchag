@@ -1,6 +1,6 @@
 # Hindu Calendar — Panchang
 
-Hindi/English Android calendar built with Expo Router, React Native and TypeScript. The app offers Gregorian month/week/today views, selected-city offline Panchang, calculated festivals and vrats, local notes, reminders, and optional local notifications. It does not require an account, GPS, or a Panchang API key.
+Multilingual Android calendar built with Expo Router, React Native and TypeScript. The app offers Gregorian month/week/today views, selected-city offline Panchang, calculated festivals and vrats, local notes, reminders, and optional local notifications. It does not require an account, GPS, or a Panchang API key.
 
 ## Start the app
 
@@ -8,14 +8,22 @@ Requires Node.js 22.13+ and npm. Install dependencies with `npm ci`, then run `n
 
 On some Ubuntu setups Expo prints a React Native DevTools `chrome-sandbox` warning at startup. Metro continues running and Android bundling is unaffected. `npm run start:quiet` skips this optional debugger shell preparation, but does not show the interactive QR/shortcut menu; use normal `npm start` when that menu is needed. Do not change the cached Chromium helper to setuid root just to run the app.
 
+## Branding assets
+
+The supplied artwork in `assets/images/` is used as follows: `panchag-loog-new.png` is the launcher icon and configured web favicon; `logo_without_background.png` is the Android adaptive foreground, native splash mark, onboarding mark, and small loading logo; `logo_with_name_without_backgro.png` is the Home and About wordmark; `mobile view logo_and_name.png` is the brief in-app launch artwork. Expo Go displays the in-app images, but its own shell controls the phone's launcher icon and native splash. Install a newly built Android app to see those native changes. The project still targets Android, so the favicon is only a future web configuration.
+
 ## Product choices
 
 - Four tabs: Home, Calendar, Reminders, More.
 - Choose a state and district during onboarding, or a listed city for a more precise location. District Panchang timings use an approximate point derived from postal office coordinates in `Asia/Kolkata`; listed cities use curated centre coordinates.
-- Choose Hindi or English, Purnimanta or Amanta month names, Sunday/Monday week start, simple/detailed view, and text size.
+- Choose English, Hindi, Bengali, Marathi, Telugu, Tamil, Gujarati, Urdu, Kannada, Odia, Malayalam, or Punjabi; also choose Purnimanta or Amanta, Sunday/Monday week start, simple/detailed view, and text size.
 - Panchang is calculated locally by MIT licensed `panchang-ts@5.4.0`. The current adapter supports selected-city dates from 1900–2100; ordinary Gregorian navigation supports 0001–9999.
 - Personal reminders and notes use SQLite. Notifications are local, optional and scheduled on a rolling 90-day horizon.
 - Government holiday data is unavailable until official year-specific notices are sourced. Festival calculations are never labelled as government holidays.
+
+## Language coverage
+
+The ten added Indian languages follow the [2011 Census scheduled-language speaker table](https://censusindia.gov.in/nada/index.php/catalog/42458/download/46089/C-16_25062018.pdf), after Hindi. Language selection persists on the device and initially follows a supported device language. Core navigation, controls, Panchang headings, calendar dates, tithi and lunar-month names, and common first-use and empty-state messages have native-script translations. For any untranslated message, the app uses English first and Hindi second. The Panchang calculation library supplies full generated details in English or Hindi only, so names it does not expose as stable identifiers (such as some nakshatras, yogas and festival descriptions) display in English for the ten added languages. Urdu text is rendered right to left; the app's navigation layout remains in its existing order.
 
 ## Data and release status
 

@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { INDIAN_STATES_UTS, getCityById, getDistrictsByState, getStateById, searchCities } from '@/data/cities';
 import { AppText, Button, Card, Chip, Screen, SectionHeader } from '@/components/ui';
 import { colors, radius, spacing } from '@/theme';
 import { usePreferences } from '@/store/preferences';
+import { APP_LANGUAGES } from '@/i18n/languages';
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export default function OnboardingScreen() {
     <Screen>
       <View style={styles.hero}>
         <AppText variant="small" tone="primary" weight="700">{step + 1} / 3</AppText>
+        {step === 0 ? <Image source={require('../../assets/images/logo_without_background.png')} style={styles.welcomeMark} resizeMode="contain" accessibilityLabel={t('appName')} /> : null}
         <AppText variant="display" weight="700">{step === 0 ? t('onboardingWelcome') : step === 1 ? t('selectCity') : t('appearance')}</AppText>
         <AppText tone="muted">{step === 0 ? t('onboardingDescription') : step === 1 ? t('locationIntro') : t('simpleModeHint')}</AppText>
       </View>
@@ -40,12 +42,15 @@ export default function OnboardingScreen() {
       {step === 0 && (
         <View style={styles.section}>
           <SectionHeader title={t('chooseLanguage')} />
-          <Card onPress={() => setLanguage('hi')} accessibilityLabel="हिन्दी">
-            <View style={styles.choice}><AppText variant="subtitle" weight="700">हिन्दी</AppText><Chip label={language === 'hi' ? t('selected') : t('select')} selected={language === 'hi'} /></View>
-          </Card>
-          <Card onPress={() => setLanguage('en')} accessibilityLabel="English">
-            <View style={styles.choice}><AppText variant="subtitle" weight="700">English</AppText><Chip label={language === 'en' ? t('selected') : t('select')} selected={language === 'en'} /></View>
-          </Card>
+          {APP_LANGUAGES.map((option) => (
+            <Card key={option.code} onPress={() => setLanguage(option.code)} accessibilityLabel={`${option.nativeName}, ${option.englishName}`}>
+              <View style={styles.choice}>
+                <AppText variant="subtitle" weight="700">{option.nativeName}</AppText>
+                <Chip label={language === option.code ? t('selected') : option.englishName}
+                  selected={language === option.code} />
+              </View>
+            </Card>
+          ))}
         </View>
       )}
 
@@ -56,7 +61,7 @@ export default function OnboardingScreen() {
             <Button title={`${getStateById(stateId)?.[language === 'hi' ? 'nameHi' : 'name'] ?? stateId} · ${t('changeState')}`} variant="secondary" onPress={() => { setLocation('', ''); setStateQuery(''); setDistrictQuery(''); setCityQuery(''); }} />
           ) : (
             <>
-              <TextInput style={styles.input} value={stateQuery} onChangeText={setStateQuery} placeholder={t('state')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('state')} />
+              <TextInput style={[styles.input, language === 'ur' && styles.rtlInput]} value={stateQuery} onChangeText={setStateQuery} placeholder={t('state')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('state')} />
               {states.map((item) => (
                 <Pressable key={item.id} onPress={() => { setLocation('', item.id); setDistrictQuery(''); setCityQuery(''); }} style={styles.row} accessibilityRole="button">
                   <AppText weight="600">{language === 'hi' ? item.nameHi : item.name}</AppText>
@@ -82,7 +87,7 @@ export default function OnboardingScreen() {
                   {locationMode === 'district' ? (
                     <>
                       <SectionHeader title={t('district')} />
-                      <TextInput style={styles.input} value={districtQuery} onChangeText={setDistrictQuery} placeholder={t('searchDistrict')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('searchDistrict')} />
+                      <TextInput style={[styles.input, language === 'ur' && styles.rtlInput]} value={districtQuery} onChangeText={setDistrictQuery} placeholder={t('searchDistrict')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('searchDistrict')} />
                       <AppText variant="small" tone="muted">{t('districtApproximation')}</AppText>
                       {districts.length === 0 && <AppText tone="muted">{t('noDistrictFound')}</AppText>}
                       {districts.map((district) => (
@@ -94,7 +99,7 @@ export default function OnboardingScreen() {
                   ) : (
                     <>
                       <SectionHeader title={t('knownCityOptional')} />
-                      <TextInput style={styles.input} value={cityQuery} onChangeText={setCityQuery} placeholder={t('searchCity')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('searchCity')} />
+                      <TextInput style={[styles.input, language === 'ur' && styles.rtlInput]} value={cityQuery} onChangeText={setCityQuery} placeholder={t('searchCity')} placeholderTextColor={colors.mutedLight} accessibilityLabel={t('searchCity')} />
                       {cities.length === 0 && <AppText tone="muted">{t('noCityFound')}</AppText>}
                       {cities.map((city) => (
                         <Pressable key={city.id} onPress={() => setLocation(city.id, city.stateId)} style={styles.row} accessibilityRole="button">
@@ -128,10 +133,12 @@ export default function OnboardingScreen() {
 
 const styles = StyleSheet.create({
   hero: { gap: spacing.sm, paddingVertical: spacing.xxl },
+  welcomeMark: { width: 82, height: 82, alignSelf: 'center' },
   section: { gap: spacing.md, marginBottom: spacing.xxl },
   choice: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.md },
   modeChoices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   input: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: radius.md, minHeight: 50, paddingHorizontal: spacing.lg, color: colors.text, fontSize: 16 },
+  rtlInput: { textAlign: 'right', writingDirection: 'rtl' },
   row: { backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.border, paddingVertical: spacing.md, paddingHorizontal: spacing.lg, minHeight: 50, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   actions: { flexDirection: 'row', justifyContent: 'flex-end', gap: spacing.md, marginTop: 'auto' },
 });

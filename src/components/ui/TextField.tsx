@@ -1,11 +1,13 @@
 import { StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 import { colors, minimumTouchTarget, radius, spacing, textScaleFactor, typeScale, useAppTextScale } from '@/theme';
 import { AppText } from './AppText';
+import { usePreferences } from '@/store/preferences';
 
 export type TextFieldProps = TextInputProps & { label: string; error?: string; hint?: string };
 
 export function TextField({ label, error, hint, style, multiline, ...rest }: TextFieldProps) {
   const scale = textScaleFactor[useAppTextScale()];
+  const isUrdu = usePreferences((state) => state.language === 'ur');
   return (
     <View style={styles.field}>
       <AppText variant="small" weight="700">{label}</AppText>
@@ -16,7 +18,7 @@ export function TextField({ label, error, hint, style, multiline, ...rest }: Tex
         allowFontScaling
         multiline={multiline}
         placeholderTextColor={colors.mutedLight}
-        style={[styles.input, { fontSize: typeScale.body.fontSize * scale, lineHeight: typeScale.body.lineHeight * scale }, multiline && styles.multiline, error && styles.inputError, style]}
+        style={[styles.input, { fontSize: typeScale.body.fontSize * scale, lineHeight: typeScale.body.lineHeight * scale, textAlign: isUrdu ? 'right' : 'left', writingDirection: isUrdu ? 'rtl' : 'ltr' }, multiline && styles.multiline, error && styles.inputError, style]}
       />
       {error ? <AppText variant="small" tone="error">{error}</AppText> : hint ? <AppText variant="caption" tone="muted">{hint}</AppText> : null}
     </View>

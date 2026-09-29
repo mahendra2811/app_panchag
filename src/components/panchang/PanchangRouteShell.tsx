@@ -8,11 +8,11 @@ import { parseCivilDate, todayInTimezone } from '@/domain/calendar';
 import { Page } from '@/features/common/Page';
 import { usePanchangDay } from '@/features/panchang/usePanchang';
 import { localizeDigits } from '@/i18n';
+import { intlLocale, type AppLanguage } from '@/i18n/languages';
 import { loadPanchangDay, type PanchangDay, type PanchangLoadResult, type PanchangProfile } from '@/services/panchang';
 import { usePreferences } from '@/store/preferences';
 import { spacing } from '@/theme';
 import { PanchangDateChooser } from './PanchangDateChooser';
-import { SourceBadge } from './SourceBadge';
 
 export function resolvePanchangDate(param: string | string[] | undefined): string {
   if (typeof param === 'string') return param;
@@ -20,21 +20,21 @@ export function resolvePanchangDate(param: string | string[] | undefined): strin
   return todayInTimezone();
 }
 
-export function formatPanchangDate(date: string, language: 'hi' | 'en', devanagariDigits = false): string {
+export function formatPanchangDate(date: string, language: AppLanguage, devanagariDigits = false): string {
   const parts = parseCivilDate(date);
   if (!parts) return date;
   const instant = new Date(0);
   instant.setUTCFullYear(parts.year, parts.month - 1, parts.day);
   instant.setUTCHours(12, 0, 0, 0);
-  const label = new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN-u-nu-latn' : 'en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(instant);
+  const label = new Intl.DateTimeFormat(intlLocale(language), { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(instant);
   return localizeDigits(label, language, devanagariDigits);
 }
 
-export function formatPanchangInstant(instant: string | null, language: 'hi' | 'en', devanagariDigits = false, withDate = false): string | undefined {
+export function formatPanchangInstant(instant: string | null, language: AppLanguage, devanagariDigits = false, withDate = false): string | undefined {
   if (!instant) return undefined;
   const value = new Date(instant);
   if (!Number.isFinite(value.getTime())) return undefined;
-  const label = new Intl.DateTimeFormat(language === 'hi' ? 'hi-IN-u-nu-latn' : 'en-IN', {
+  const label = new Intl.DateTimeFormat(intlLocale(language), {
     ...(withDate ? { day: 'numeric' as const, month: 'short' as const } : {}),
     hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata',
   }).format(value);
@@ -113,7 +113,6 @@ function ShellContent({ date, title, children, showDateChooser = true, state }: 
           <Card style={styles.sourceCard}>
             <AppText variant="body" weight="700">{t('calculated', { city: visibleDay.cityName })}</AppText>
             <AppText variant="small" tone="muted">{t(visibleDay.profile.monthSystem)} · {visibleDay.timezone}</AppText>
-            {/* <SourceBadge label={t('calculationUnverified')} detail={`panchang-ts ${visibleDay.provenance.sourceVersion}`} tone="warning" /> */}
             {visibleDay.provenance.coordinateStatus === 'postal_district_approximation' ? <AppText variant="small" tone="muted">{t('districtApproximation')}</AppText> : null}
             <AppText variant="caption" tone="muted">{t('sourceHint')}</AppText>
           </Card>

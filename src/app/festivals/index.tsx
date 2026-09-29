@@ -4,7 +4,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { CalendarHeader, MonthYearPicker } from '@/components/calendar';
 import { FestivalCard } from '@/components/festivals';
-import { SourceBadge, formatPanchangDate } from '@/components/panchang';
+import { formatPanchangDate } from '@/components/panchang';
 import { AppText, Button, Chip, IconButton, LoadingState, StatusState, TextField } from '@/components/ui';
 import { INDIAN_STATES_UTS, getCityById } from '@/data/cities';
 import { daysInMonth, formatCivilDate, todayInTimezone } from '@/domain/calendar';
@@ -121,7 +121,6 @@ export default function FestivalsScreen() {
             <Chip label={t('allCategories')} selected={category === 'all'} onPress={() => setCategory('all')} />
             {categories.map((entry) => <Chip key={entry} label={t(entry, { defaultValue: entry })} selected={category === entry} onPress={() => setCategory(entry)} />)}
           </View>
-          {/* <SourceBadge label={t('calculationUnverified')} tone="warning" /> */}
           {loading ? <LoadingState label={t('loading')} /> : loadError ? (
             <StatusState title={t('dataUnavailable')} actionLabel={t('retry')} onAction={() => setRevision((value) => value + 1)} />
           ) : filtered.length === 0 ? (

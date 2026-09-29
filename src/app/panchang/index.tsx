@@ -5,6 +5,7 @@ import { PanchangRouteShell, PanchangSection, TimeRangeRow, formatPanchangInstan
 import { MenuRow } from '@/features/common/Page';
 import { usePreferences } from '@/store/preferences';
 import type { PanchangPeriod } from '@/services/panchang';
+import { localizeMasa, localizeTithi } from '@/i18n/panchang';
 
 export default function PanchangScreen() {
   const params = useLocalSearchParams<{ date?: string }>();
@@ -16,7 +17,7 @@ export default function PanchangScreen() {
   const renderPeriod = (entry: PanchangPeriod) => (
     <TimeRangeRow
       key={`${entry.id}:${entry.startsAt ?? ''}`}
-      label={entry.name}
+      label={entry.id.startsWith('tithi:') ? localizeTithi(entry.id, entry.paksha ?? null, entry.name, language) : entry.name}
       start={formatPanchangInstant(entry.startsAt, language, devanagariDigits, true)}
       end={formatPanchangInstant(entry.endsAt, language, devanagariDigits, true)}
       unavailableLabel={t('dataUnavailable')}
@@ -27,8 +28,8 @@ export default function PanchangScreen() {
       {(day) => (
         <>
           <Card>
-            <AppText variant="subtitle" weight="700">{day.summaryAtSunrise.masaName ?? t('lunarMonth')}</AppText>
-            {day.summaryAtSunrise.tithiName ? <AppText tone="primary" weight="600">{day.summaryAtSunrise.tithiName}</AppText> : null}
+            <AppText variant="subtitle" weight="700">{localizeMasa(day.summaryAtSunrise.masaId, day.summaryAtSunrise.masaName, language) || t('lunarMonth')}</AppText>
+            {day.summaryAtSunrise.tithiName ? <AppText tone="primary" weight="600">{localizeTithi(day.summaryAtSunrise.tithiId, day.summaryAtSunrise.pakshaId, day.summaryAtSunrise.tithiName, language)}</AppText> : null}
             <AppText variant="small" tone="muted">{t(day.profile.monthSystem)} · {t('samvat')} {day.summaryAtSunrise.vikramSamvat ?? '—'}</AppText>
           </Card>
           <PanchangSection title={t('fiveLimbs')}>

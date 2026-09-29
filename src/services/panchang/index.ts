@@ -1,6 +1,7 @@
 import { getDailyPanchang } from 'panchang-ts';
 import { addCivilDays, civilDateToISTNoon, compareCivilDates, parseCivilDate, type CivilDate } from '../../domain/calendar';
 import { getCityById, type City } from '../../data/cities';
+import { engineLanguage, type AppLanguage } from '../../i18n/languages';
 
 export type MonthSystem = 'purnimanta' | 'amanta';
 export type FestivalRegion = 'all' | 'tamil-nadu' | 'kerala' | 'karnataka' | 'andhra-pradesh' | 'telangana' |
@@ -101,16 +102,17 @@ function isFestivalRegion(value: string): value is FestivalRegion { return REGIO
 
 const cache = new Map<string, PanchangDay>();
 const MAX_CACHED_DAYS = 400;
-export function getCachedPanchangDay(date: CivilDate | string, profile: PanchangProfile, language: 'en' | 'hi' = 'en'): PanchangDay | null {
+export function getCachedPanchangDay(date: CivilDate | string, profile: PanchangProfile, language: AppLanguage = 'en'): PanchangDay | null {
   const id = createProfileId(profile);
-  return id ? cache.get(`${id}:${date}:${language}`) ?? null : null;
+  return id ? cache.get(`${id}:${date}:${engineLanguage(language)}`) ?? null : null;
 }
 export function clearPanchangCache(): void { cache.clear(); }
 export function getPanchangCacheSize(): number { return cache.size; }
 
 function paksha(value: string): 'SHUKLA' | 'KRISHNA' | null {
   const normalized = value.toLowerCase();
-  return normalized.includes('shukla') ? 'SHUKLA' : normalized.includes('krishna') ? 'KRISHNA' : null;
+  return normalized.includes('shukla') || normalized.includes('शुक्ल') ? 'SHUKLA'
+    : normalized.includes('krishna') || normalized.includes('कृष्ण') ? 'KRISHNA' : null;
 }
 function instant(value: Date | null | undefined): string | null { return value instanceof Date && Number.isFinite(value.getTime()) ? value.toISOString() : null; }
 function period(id: string, name: string, index: number | null, start: Date | null, end: Date | null,
@@ -175,23 +177,24 @@ function normalizeDay(date: CivilDate, city: City, profile: PanchangProfile, pro
 }
 
 /** Local-only compute. A short yield lets React paint a loading state before the synchronous engine runs. */
-export async function loadPanchangDay(date: CivilDate | string, profile: PanchangProfile, language: 'en' | 'hi' = 'en'): Promise<PanchangLoadResult> {
+export async function loadPanchangDay(date: CivilDate | string, profile: PanchangProfile, language: AppLanguage = 'en'): Promise<PanchangLoadResult> {
   const parts = parseCivilDate(date);
   if (!parts) return { status: 'invalid', day: null, reason: 'Invalid Gregorian date' };
   if (parts.year < 1900 || parts.year > 2100) return { status: 'outside_coverage', day: null, reason: 'Panchang calculation is limited to 1900–2100; Gregorian browsing remains available.' };
   const city = getCityById(profile.cityId);
   const profileId = createProfileId(profile);
   if (!city || !profileId) return { status: 'not_supported', day: null, reason: 'Choose a supported city, month system and region.' };
-  const cached = getCachedPanchangDay(date,profile,language);
+  const calculationLanguage = engineLanguage(language);
+  const cached = getCachedPanchangDay(date,profile,calculationLanguage);
   if (cached) return { status: 'available', day: cached };
   await new Promise<void>(resolve => setTimeout(resolve,0));
   try {
     const instant = civilDateToISTNoon(date)!;
     const result = getDailyPanchang(instant,{latitude:city.latitude,longitude:city.longitude},
-      {timezone:330,masaSystem:profile.monthSystem,region:profile.region,ayanamsa:'lahiri',language});
+      {timezone:330,masaSystem:profile.monthSystem,region:profile.region,ayanamsa:'lahiri',language:calculationLanguage});
     if (!result) return { status: 'not_supported', day: null, reason: 'The engine could not form a sunrise-to-sunrise day for this location.' };
-    const day = normalizeDay(date as CivilDate,city,profile,profileId,language,result);
-    cache.set(`${profileId}:${date}:${language}`,day);
+    const day = normalizeDay(date as CivilDate,city,profile,profileId,calculationLanguage,result);
+    cache.set(`${profileId}:${date}:${calculationLanguage}`,day);
     if (cache.size > MAX_CACHED_DAYS) cache.delete(cache.keys().next().value!);
     return { status: 'available', day };
   } catch (error) {
@@ -200,7 +203,7 @@ export async function loadPanchangDay(date: CivilDate | string, profile: Panchan
 }
 
 /** Inclusive range, capped to a single visible month plus adjacent cells. */
-export async function loadPanchangRange(start: CivilDate | string, end: CivilDate | string, profile: PanchangProfile, language: 'en' | 'hi' = 'en'): Promise<PanchangLoadResult[]> {
+export async function loadPanchangRange(start: CivilDate | string, end: CivilDate | string, profile: PanchangProfile, language: AppLanguage = 'en'): Promise<PanchangLoadResult[]> {
   if (!parseCivilDate(start) || !parseCivilDate(end) || compareCivilDates(start,end) > 0) throw new RangeError('Invalid date range');
   const results: PanchangLoadResult[] = [];
   let cursor: CivilDate | null = start as CivilDate;

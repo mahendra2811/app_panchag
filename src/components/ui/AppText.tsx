@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Text, type TextProps, type TextStyle } from 'react-native';
 import { colors, textScaleFactor, typeScale, useAppTextScale } from '@/theme';
+import { usePreferences } from '@/store/preferences';
 
 export type TextVariant = keyof typeof typeScale;
 export type TextTone = 'default' | 'muted' | 'primary' | 'sunday' | 'success' | 'error' | 'inverse';
@@ -33,11 +34,12 @@ export function AppText({
   ...rest
 }: AppTextProps) {
   const scale = textScaleFactor[useAppTextScale()];
+  const isUrdu = usePreferences((state) => state.language === 'ur');
   return (
     <Text
       allowFontScaling
       {...rest}
-      style={[typeScale[variant], { fontSize: typeScale[variant].fontSize * scale, lineHeight: typeScale[variant].lineHeight * scale, color: toneColors[tone], fontWeight: weight, textAlign: align }, style]}
+      style={[typeScale[variant], { fontSize: typeScale[variant].fontSize * scale, lineHeight: typeScale[variant].lineHeight * scale, color: toneColors[tone], fontWeight: weight, textAlign: align ?? (isUrdu ? 'right' : undefined), writingDirection: isUrdu ? 'rtl' : 'ltr' }, style]}
     >
       {children}
     </Text>

@@ -25,7 +25,7 @@ export function WeekStrip({ startDate, weekdayLabels, weekStart = 0, selectedDat
     <View style={styles.wrapper}>
       <View style={styles.row}>
         {dates.map((date, index) => (
-          <View key={date ?? `outside-${index}`} style={styles.weekday}>
+          <View key={date ?? `outside-${index}`} style={[styles.weekday, index < 6 && styles.verticalDivider]}>
             <AppText variant="small" weight="700" tone={(weekStart + index) % 7 === 0 ? 'sunday' : 'muted'} align="center" numberOfLines={1}>
               {weekdayLabels[(weekStart + index) % 7] ?? ''}
             </AppText>
@@ -42,14 +42,15 @@ export function WeekStrip({ startDate, weekdayLabels, weekStart = 0, selectedDat
             isSelected={date === selectedDate}
             isToday={date === todayDate}
             isSunday={dayOfWeek(date) === 0}
+            isWeekEnd={index === 6}
             todayLabel={todayLabel}
             data={days[date]}
             onPress={onSelectDate}
           />
-        ) : <View key={`outside-${index}`} style={styles.emptyCell} />)}
+        ) : <View key={`outside-${index}`} style={[styles.emptyCell, index < 6 && styles.verticalDivider]} />)}
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({ wrapper: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, overflow: 'hidden' }, row: { flexDirection: 'row', paddingTop: spacing.xs }, weekday: { width: '14.2857%' }, emptyCell: { width: '14.2857%', minHeight: 90 } });
+const styles = StyleSheet.create({ wrapper: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 16, overflow: 'hidden' }, row: { flexDirection: 'row', paddingTop: spacing.xs }, weekday: { width: '14.2857%' }, verticalDivider: { borderRightWidth: StyleSheet.hairlineWidth, borderRightColor: colors.border }, emptyCell: { width: '14.2857%', height: 90 } });

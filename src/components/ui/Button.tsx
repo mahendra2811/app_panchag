@@ -12,6 +12,7 @@ export type ButtonProps = {
   loading?: boolean;
   icon?: ReactNode;
   fullWidth?: boolean;
+  compact?: boolean;
   accessibilityHint?: string;
   style?: ViewStyle;
 };
@@ -24,6 +25,7 @@ export function Button({
   loading = false,
   icon,
   fullWidth = false,
+  compact = false,
   accessibilityHint,
   style,
 }: ButtonProps) {
@@ -35,10 +37,12 @@ export function Button({
       accessibilityLabel={title}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: unavailable, busy: loading }}
+      hitSlop={{ top: compact ? 6 : spacing.xxs, bottom: compact ? 6 : spacing.xxs }}
       disabled={unavailable}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
+        compact && styles.compact,
         styles[variant],
         fullWidth && styles.fullWidth,
         pressed && !unavailable && styles.pressed,
@@ -47,7 +51,7 @@ export function Button({
       ]}
     >
       {loading ? <ActivityIndicator color={foreground} size="small" /> : icon}
-      <AppText variant="body" weight="700" tone={variant === 'primary' || variant === 'danger' ? 'inverse' : 'primary'}>
+      <AppText variant="small" weight="700" tone={variant === 'primary' || variant === 'danger' ? 'inverse' : 'primary'}>
         {title}
       </AppText>
     </Pressable>
@@ -56,16 +60,17 @@ export function Button({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: minimumTouchTarget,
+    minHeight: minimumTouchTarget - spacing.xs,
     minWidth: minimumTouchTarget,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     borderRadius: radius.md,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     gap: spacing.sm,
   },
+  compact: { minHeight: 36, paddingVertical: 0 },
   primary: { backgroundColor: colors.primary },
   secondary: { backgroundColor: colors.primaryTint, borderWidth: 1, borderColor: colors.primary },
   ghost: { backgroundColor: 'transparent' },

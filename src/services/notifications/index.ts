@@ -3,13 +3,15 @@ import * as Notifications from 'expo-notifications';
 import { getDatabase } from '@/db';
 import { addCivilDays, occurrenceDates, wallTimeToInstant } from '@/domain/recurrence';
 import type { RecurrenceRule } from '@/domain/recurrence';
+import i18n from '@/i18n';
+import type { AppLanguage } from '@/i18n/languages';
 
 const CHANNEL_ID = 'calendar-reminders';
 const OWNER = 'hindu-calendar-reminder';
 /** Future native alarms are replenished when the app starts or resumes. */
 export const SCHEDULE_HORIZON_DAYS = 90;
 export const MAX_SCHEDULED_ALARMS = 256;
-type Language = 'hi' | 'en';
+type Language = AppLanguage;
 type ReminderRow = {
   id: string; title: string; start_date: string; wall_time: string | null; time_zone: string;
   recurrence_json: string; notification_enabled: number; revision: number;
@@ -35,7 +37,7 @@ type Desired = {
 };
 
 let reconciliationTail: Promise<NotificationStatus | void> = Promise.resolve();
-let currentOptions: { language: Language; enabled: boolean } = { language: 'hi', enabled: true };
+let currentOptions: { language: Language; enabled: boolean } = { language: 'en', enabled: true };
 let handlerInstalled = false;
 
 function notificationKey(reminderId: string, occurrenceKey: string): string {
@@ -184,7 +186,7 @@ async function doReconcile(language: Language, enabled: boolean): Promise<Notifi
           identifier: `hc-${item.reminderId}-${item.key}-${item.revision}-${item.language}`,
           content: {
             title: item.title,
-            body: item.language === 'hi' ? 'आपका कैलेंडर रिमाइंडर' : 'Your calendar reminder',
+            body: i18n.t('reminderNotificationBody', { lng: item.language }),
             data: { owner: OWNER, reminderId: item.reminderId, occurrenceKey: item.key, fingerprint: item.fingerprint },
             sound: 'default',
           },
