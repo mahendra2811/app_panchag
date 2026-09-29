@@ -8,9 +8,44 @@ Requires Node.js 22.13+ and npm. Install dependencies with `npm ci`, then run `n
 
 On some Ubuntu setups Expo prints a React Native DevTools `chrome-sandbox` warning at startup. Metro continues running and Android bundling is unaffected. `npm run start:quiet` skips this optional debugger shell preparation, but does not show the interactive QR/shortcut menu; use normal `npm start` when that menu is needed. Do not change the cached Chromium helper to setuid root just to run the app.
 
+## Build an Android AAB for Google Play
+
+Run these commands from the project root. `npm start` only starts the development server; it does not create a release file.
+
+1. Install dependencies and check the code:
+
+   ```bash
+   npm ci
+   npm run typecheck
+   npm run lint
+   ```
+
+2. Install the EAS CLI and sign in to the Expo account linked to this project:
+
+   ```bash
+   npm install --global eas-cli
+   eas login
+   ```
+
+   The project already has an EAS project ID in `app.json` and a `production` profile in `eas.json`. On the first build, follow the CLI prompts to create or select Android signing credentials. Keep those credentials secure.
+
+3. For an update to an existing Play Store app, increase `expo.android.versionCode` in `app.json` before building. The current value is `1`. Update `expo.version` when the user-facing version changes too.
+
+4. Create the production Android App Bundle:
+
+   ```bash
+   eas build --platform android --profile production
+   ```
+
+   This project's `production` profile sets `android.buildType` to `app-bundle`, so the result is a signed `.aab`. EAS prints a build URL; when the build finishes, open it and download the AAB from the build page. Native changes such as the splash screen or launcher icon require a new build.
+
+5. Upload the AAB to the appropriate release track in Google Play Console. Building the AAB does not publish the app. If Play submission credentials are configured, `eas submit --platform android` can upload a completed build instead. Finish the store listing, required declarations, and release review in Play Console before rollout.
+
+For an installable test file, use `eas build --platform android --profile preview` to create an APK. An AAB is intended for Play distribution and cannot be installed directly like an APK. See [Expo's Android submission guide](https://docs.expo.dev/submit/android/) and [EAS Build documentation](https://docs.expo.dev/build/introduction/).
+
 ## Branding assets
 
-The supplied artwork in `assets/images/` is used as follows: `panchag-loog-new.png` is the launcher icon and configured web favicon; `logo_without_background.png` is the Android adaptive foreground, native splash mark, onboarding mark, and small loading logo; `logo_with_name_without_backgro.png` is the Home and About wordmark; `mobile view logo_and_name.png` is the brief in-app launch artwork. Expo Go displays the in-app images, but its own shell controls the phone's launcher icon and native splash. Install a newly built Android app to see those native changes. The project still targets Android, so the favicon is only a future web configuration.
+The supplied artwork in `assets/images/` is used as follows: `panchag-loog-new.png` is the launcher icon and configured web favicon; `logo_without_background.png` is the Android adaptive foreground, native splash mark, onboarding mark, and in-app loading logo; `logo_with_name_without_backgro.png` is the Home and About wordmark. Expo Go displays the in-app images, but its own shell controls the phone's launcher icon and native splash. Install a newly built Android app to see those native changes. The project still targets Android, so the favicon is only a future web configuration.
 
 ## Product choices
 
