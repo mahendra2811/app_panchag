@@ -66,43 +66,9 @@ export function CalendarHeader({
       </View>
       {onToday || onChangeView ? (
         <View style={styles.actionRow}>
-          {panchangSummary || (onToday && !onChangeView) ? (
-            <View style={styles.todayGroup}>
-              {onToday && !onChangeView ? (
-                <Button title={labels.today} variant="secondary" onPress={onToday} compact />
-              ) : null}
-              {!!panchangSummary && (
-                <View
-                  style={styles.todayPanchang}
-                  accessibilityLabel={`${panchangSummary.months}, ${panchangSummary.samvat}`}
-                >
-                  <AppText
-                    variant="caption"
-                    tone="primary"
-                    weight="600"
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.7}
-                  >
-                    {panchangSummary.months}
-                  </AppText>
-                  {!!panchangSummary.samvat && (
-                    <AppText
-                      variant="caption"
-                      tone="muted"
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.7}
-                    >
-                      {panchangSummary.samvat}
-                    </AppText>
-                  )}
-                </View>
-              )}
-            </View>
-          ) : (
-            <View />
-          )}
+          {onToday && !onChangeView ? (
+            <Button title={labels.today} variant="secondary" onPress={onToday} compact />
+          ) : null}
           {onChangeView ? (
             <View style={styles.views}>
               <Chip
@@ -131,6 +97,36 @@ export function CalendarHeader({
               />
             </View>
           ) : null}
+          {panchangSummary ? (
+            <View
+              style={styles.todayPanchang}
+              accessibilityLabel={`${panchangSummary.months}, ${panchangSummary.samvat}`}
+            >
+              <AppText
+                variant="caption"
+                tone="primary"
+                weight="600"
+                align="right"
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.7}
+              >
+                {panchangSummary.months}
+              </AppText>
+              {!!panchangSummary.samvat && (
+                <AppText
+                  variant="caption"
+                  tone="muted"
+                  align="right"
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                >
+                  {panchangSummary.samvat}
+                </AppText>
+              )}
+            </View>
+          ) : null}
         </View>
       ) : null}
     </View>
@@ -150,13 +146,20 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: spacing.sm,
+    gap: spacing.lg,
   },
-  todayGroup: { flex: 1, minWidth: 138, alignItems: 'flex-start' },
-  todayPanchang: { flex: 1, minWidth: 138, maxWidth: 220 },
-  views: { flexDirection: 'row', flexWrap: 'nowrap', minWidth: 220, maxWidth: '100%', marginLeft: 'auto', gap: spacing.xs },
-  viewChip: { flexShrink: 1, minWidth: 0, paddingHorizontal: spacing.xs },
+  todayPanchang: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: colors.goldTint,
+    borderColor: colors.gold,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  views: { width: '62%', maxWidth: 260, flexDirection: 'row', gap: spacing.sm },
+  viewChip: { flex: 1, minWidth: 0, paddingHorizontal: spacing.xxs },
 });

@@ -26,18 +26,35 @@
     },
     "plugins": [
       "expo-router",
-      ["expo-splash-screen", {
-        "image": "./assets/images/logo_without_background.png",
-        "imageWidth": 180,
-        "resizeMode": "contain",
-        "backgroundColor": "#FFF8EC"
-      }],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo_without_background.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#FFF8EC"
+        }
+      ],
       "expo-sqlite",
       "expo-notifications",
-      ["expo-localization", { "supportedLocales": { "android": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"], "ios": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"] } }]
+      [
+        "expo-localization",
+        {
+          "supportedLocales": {
+            "android": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"],
+            "ios": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"]
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3d707d4a-ae11-4e03-a1f3-3dd046bc4bc2"
+      }
     }
   }
 }

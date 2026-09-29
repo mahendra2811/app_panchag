@@ -2,13 +2,13 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ImageBackground, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
 
 import { getReminder } from '@/features/reminders/repository';
 import i18n from '@/i18n';
 import { reconcileNotifications, startReminderReconciliation } from '@/services/notifications';
 import { usePreferences } from '@/store/preferences';
-import { TextScaleProvider } from '@/theme';
+import { colors, radius, spacing, TextScaleProvider } from '@/theme';
 
 export default function RootLayout() {
   const router = useRouter();
@@ -64,9 +64,23 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }} />
       {(!hydrated || !brandIntroReady) && (
         <View style={styles.loading} accessibilityRole="progressbar" accessibilityLabel={i18n.t('loading')}>
-          <ImageBackground source={require('../../assets/images/mobile view logo_and_name.png')} resizeMode="cover" style={styles.loadingArtwork}>
-            <View style={styles.loadingIndicator}><ActivityIndicator color="#A83E0C" size="small" /></View>
-          </ImageBackground>
+          <View style={styles.brand}>
+            <View style={styles.logoHalo}>
+              <Image
+                source={require('../../assets/images/logo_without_background.png')}
+                resizeMode="contain"
+                style={styles.logo}
+                accessibilityLabel="हिन्दू कैलेंडर"
+              />
+            </View>
+            <Text style={styles.brandName}>हिन्दू कैलेंडर</Text>
+            <View style={styles.divider} />
+            <Text style={styles.brandDescription}>पंचांग · तिथि · त्योहार</Text>
+          </View>
+          <View style={styles.loadingIndicator}>
+            <ActivityIndicator color={colors.primary} size="small" />
+            <Text style={styles.loadingText}>लोड हो रहा है…</Text>
+          </View>
         </View>
       )}
     </TextScaleProvider>
@@ -74,7 +88,56 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  loading: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: '#FFF8EC' },
-  loadingArtwork: { flex: 1, justifyContent: 'flex-end', alignItems: 'center' },
-  loadingIndicator: { marginBottom: 40, padding: 12, borderRadius: 999, backgroundColor: 'rgba(255,248,236,0.9)' },
+  loading: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.xxl,
+  },
+  brand: { alignItems: 'center', width: '100%' },
+  logoHalo: {
+    width: 224,
+    height: 224,
+    borderRadius: radius.pill,
+    backgroundColor: colors.goldTint,
+    borderColor: colors.border,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xxl,
+  },
+  logo: { width: 188, height: 188 },
+  brandName: {
+    color: colors.primaryPressed,
+    fontSize: 30,
+    lineHeight: 42,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  divider: {
+    width: 72,
+    height: 3,
+    borderRadius: radius.pill,
+    backgroundColor: colors.gold,
+    marginVertical: spacing.md,
+  },
+  brandDescription: {
+    color: colors.muted,
+    fontSize: 15,
+    lineHeight: 24,
+    textAlign: 'center',
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    bottom: spacing.xxxl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  loadingText: { color: colors.muted, fontSize: 14, lineHeight: 22 },
 });
