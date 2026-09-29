@@ -1,21 +1,21 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-import { AgendaDayList, CalendarHeader, MonthGrid, MonthYearPicker } from '@/components/calendar';
+import { AgendaDayList, CalendarHeader, DatePickerField, MonthGrid, MonthYearPicker } from '@/components/calendar';
 import type { CalendarDayData } from '@/components/calendar';
 import { AppText, Button, Card, Screen, SectionHeader } from '@/components/ui';
 import { SourceBadge } from '@/components/panchang';
 import { getCityById } from '@/data/cities';
-import { formatCivilDate, getMonthGrid, normalizeDateDigits, parseCivilDate } from '@/domain/calendar';
+import { formatCivilDate, getMonthGrid, parseCivilDate } from '@/domain/calendar';
 import { dateLabel, monthLabel } from '@/features/calendar/format';
 import { useMonthSummary } from '@/features/calendar/useMonthSummary';
 import { useToday } from '@/features/calendar/useToday';
 import { usePanchangProfile } from '@/features/panchang/usePanchang';
 import { localizeDigits, MONTH_NAMES, WEEKDAY_NAMES } from '@/i18n';
 import { usePreferences } from '@/store/preferences';
-import { colors, radius, spacing } from '@/theme';
+import { spacing } from '@/theme';
 
 export default function CalendarScreen() {
   const router = useRouter();
@@ -26,8 +26,6 @@ export default function CalendarScreen() {
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [year, setYear] = useState(Number(today.slice(0, 4)));
   const [month, setMonth] = useState(Number(today.slice(5, 7)));
-  const [dateInput, setDateInput] = useState('');
-  const [dateError, setDateError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { days, loadedCount, totalCount, loading } = useMonthSummary(year, month, profile, language);
   const city = cityId ? getCityById(cityId) : null;
@@ -49,7 +47,7 @@ export default function CalendarScreen() {
   function choose(date: string) {
     const parts = parseCivilDate(date);
     if (!parts) return;
-    setSelectedDate(date); setYear(parts.year); setMonth(parts.month); setDateError(false);
+    setSelectedDate(date); setYear(parts.year); setMonth(parts.month);
   }
 
   function move(delta: -1 | 1) {
@@ -60,24 +58,13 @@ export default function CalendarScreen() {
     if (next) choose(next);
   }
 
-  function goToTypedDate() {
-    const date = normalizeDateDigits(dateInput.trim());
-    if (!parseCivilDate(date)) { setDateError(true); return; }
-    choose(date);
-    router.push(`/date/${date}`);
-  }
-
   return (
     <Screen>
       <AppText variant="title" weight="700">{t('calendar')}</AppText>
       <AppText tone="muted" variant="small">{t('selectDateHint')}</AppText>
       <View style={styles.searchRow}>
-        <TextInput value={dateInput} onChangeText={(value) => { setDateInput(value); setDateError(false); }}
-          placeholder="YYYY-MM-DD" placeholderTextColor={colors.mutedLight} accessibilityLabel={t('goToDate')}
-          keyboardType="numbers-and-punctuation" maxLength={10} style={[styles.input, dateError && styles.invalid]} />
-        <Button title={t('goToDate')} onPress={goToTypedDate} />
+        <DatePickerField date={selectedDate} label={t('chooseDate')} onSelect={(date) => { choose(date); router.push(`/date/${date}`); }} />
       </View>
-      {dateError && <AppText tone="error" variant="small">{t('invalidDate')}</AppText>}
 
       <CalendarHeader monthLabel={monthLabel(year, month, language, devanagariDigits)} onPrevious={() => move(-1)} onNext={() => move(1)}
         onPickMonth={() => setPickerOpen(true)} onToday={() => choose(today)}
@@ -94,7 +81,7 @@ export default function CalendarScreen() {
 
       {loading && <AppText tone="muted" variant="small">{t('loading')} {loadedCount}/{totalCount}</AppText>}
       {!city && <Button title={t('selectCity')} variant="secondary" onPress={() => router.push('/settings/location')} />}
-      {city && <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t('calculationUnverified')} />}
+      {/* {city && <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t(city.kind === 'district' ? 'districtApproximation' : 'calculationUnverified')} />} */}
 
       <Card style={styles.summary}>
         <SectionHeader title={t('selectedDay')} subtitle={dateLabel(selectedDate, language, devanagariDigits)} />
@@ -114,7 +101,5 @@ export default function CalendarScreen() {
 
 const styles = StyleSheet.create({
   searchRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  input: { flex: 1, minHeight: 48, minWidth: 120, paddingHorizontal: spacing.md, borderWidth: 1, borderColor: colors.borderStrong, borderRadius: radius.md, backgroundColor: colors.surface, color: colors.text, fontSize: 16 },
-  invalid: { borderColor: colors.error },
   summary: { gap: spacing.md },
 });

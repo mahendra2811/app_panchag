@@ -18,3 +18,7 @@ The app uses these direct runtime dependencies. Versions and licence identifiers
 | AsyncStorage | 2.2.0 | MIT | Preference persistence |
 
 This direct-dependency inventory is not a substitute for a generated full transitive dependency notice at release time. The app does not bundle Swiss Ephemeris or redistribute a paid Panchang API response.
+
+## Postal district data
+
+`src/data/cities/postal-districts.json` is a compact offline derivative of [All India Pincode JSON API](https://aniket-thapa.github.io/india-pincode-api/) © 2026 Aniket Thapa, licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). The app copied district names and calculated one approximate representative coordinate per district from post-office coordinates. The original licence text is in [`src/data/cities/POSTAL_DATA_LICENSE.txt`](../src/data/cities/POSTAL_DATA_LICENSE.txt). This noncommercial licence is a release restriction for any commercial distribution.

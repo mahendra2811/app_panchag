@@ -34,6 +34,12 @@ export default function LicensesScreen() {
         <AppText variant="small" selectable>{PANCHANG_TS_MIT_NOTICE}</AppText>
       </Card>
       <Card style={{ gap: spacing.sm }}>
+        <SectionHeader title={t('licencePostalData')} />
+        <AppText variant="small" selectable>
+          {'All India Pincode JSON API © 2026 Aniket Thapa. Licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). Offline district names and approximate coordinates are derived from this source. Changes: district labels normalized and representative coordinates calculated from postal office points. Source: https://aniket-thapa.github.io/india-pincode-api/ · Licence: https://creativecommons.org/licenses/by-nc/4.0/'}
+        </AppText>
+      </Card>
+      <Card style={{ gap: spacing.sm }}>
         <SectionHeader title={t('licenceLibraries')} />
         <AppText variant="small" tone="muted">Expo · React Native · React · i18next · Zustand · Lucide</AppText>
       </Card>

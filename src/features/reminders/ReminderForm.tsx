@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BackHandler, Pressable, StyleSheet, Switch, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { DatePickerField } from '@/components/calendar';
 import { RecurrencePicker } from '@/components/reminders';
 import { AppText, Button, Card, Chip, ConfirmDialog, Screen, TextField } from '@/components/ui';
 import { addCivilDays, isCivilDate, isTimeZone, isWallTime, occurrencePreview, validateRecurrence } from '@/domain/recurrence';
@@ -127,7 +128,7 @@ export function ReminderForm({
       <View style={styles.content}>
         <TextField label={t('reminderTitle')} value={name} onChangeText={setName} maxLength={120} autoFocus />
         <View style={styles.row}>
-          <View style={styles.grow}><TextField label={t('date')} value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" keyboardType="numbers-and-punctuation" hint={t('dateFormatHint')} /></View>
+          <View style={styles.grow}><DatePickerField date={date} label={t('date')} onSelect={setDate} /></View>
           <Button title={t('today')} variant="secondary" onPress={() => setDate(deviceCivilDate())} />
         </View>
         <View style={styles.field}>
@@ -153,9 +154,12 @@ export function ReminderForm({
           labels={{ none: t('noRepeat'), daily: t('daily'), weekly: t('weekly'), monthly: t('monthly'), yearly: t('yearly'), custom: t('repeat') }}
         />
         {frequency !== 'none' ? (
-          <View style={styles.row}>
+          <View style={[styles.row, styles.recurrenceRow]}>
             <View style={styles.grow}><TextField label={t('interval')} value={interval} onChangeText={setInterval} keyboardType="number-pad" maxLength={3} /></View>
-            <View style={styles.grow}><TextField label={t('endsOn')} value={untilDate} onChangeText={setUntilDate} placeholder={t('never')} keyboardType="numbers-and-punctuation" /></View>
+            <View style={styles.grow}>
+              <DatePickerField date={untilDate} fallbackDate={date} label={t('endsOn')} placeholder={t('never')} onSelect={setUntilDate} />
+              {untilDate ? <Button title={t('clear')} variant="ghost" onPress={() => setUntilDate('')} style={styles.clearDate} /> : null}
+            </View>
           </View>
         ) : null}
         <Card>
@@ -190,6 +194,7 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.xl },
   back: { minWidth: minimumTouchTarget, minHeight: minimumTouchTarget, alignItems: 'center', justifyContent: 'center' },
   heading: { flex: 1 }, content: { gap: spacing.lg }, row: { flexDirection: 'row', alignItems: 'flex-end', gap: spacing.md },
-  grow: { flex: 1 }, field: { gap: spacing.sm }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  recurrenceRow: { alignItems: 'flex-start' },
+  grow: { flex: 1 }, clearDate: { alignSelf: 'flex-start' }, field: { gap: spacing.sm }, chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   switchRow: { minHeight: minimumTouchTarget, flexDirection: 'row', alignItems: 'center', gap: spacing.md },
 });

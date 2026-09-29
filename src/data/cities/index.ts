@@ -1,4 +1,6 @@
-/** India city catalog v1. Coordinates are curated city-centre points (not survey-grade). */
+/** Curated city points plus approximate postal-district points for offline location selection. */
+import postalDistrictRows from './postal-districts.json';
+
 export interface IndianStateUT { id: string; name: string; nameHi: string; kind: 'state' | 'union_territory' }
 export interface City {
   id: string;
@@ -9,6 +11,7 @@ export interface City {
   longitude: number;
   timezone: 'Asia/Kolkata';
   aliases: readonly string[];
+  kind: 'city' | 'district';
 }
 
 export const INDIAN_STATES_UTS: readonly IndianStateUT[] = [
@@ -118,12 +121,23 @@ const CITY_ROWS: CityTuple[] = [
 ];
 
 export const INDIAN_CITIES: readonly City[] = CITY_ROWS.map(([id,name,nameHi,stateId,latitude,longitude,aliases]) => ({
-  id,name,nameHi,stateId,latitude,longitude,aliases: aliases ?? [],timezone: 'Asia/Kolkata',
+  id,name,nameHi,stateId,latitude,longitude,aliases: aliases ?? [],timezone: 'Asia/Kolkata',kind: 'city',
 }));
-const CITY_BY_ID = new Map(INDIAN_CITIES.map(city => [city.id,city]));
+export const POSTAL_DISTRICTS: readonly City[] = postalDistrictRows.map(([id,name,stateId,latitude,longitude]) => ({
+  id: String(id), name: String(name), nameHi: String(name), stateId: String(stateId),
+  latitude: Number(latitude), longitude: Number(longitude), timezone: 'Asia/Kolkata',
+  aliases: id === 'pb-s-a-s-nagar' ? ['Mohali', 'SAS Nagar', 'Sahibzada Ajit Singh Nagar'] : [],
+  kind: 'district',
+}));
+const CITY_BY_ID = new Map([...INDIAN_CITIES, ...POSTAL_DISTRICTS].map(city => [city.id,city]));
 
 export function getCityById(id: string): City | null { return CITY_BY_ID.get(id) ?? null; }
 export function getStateById(id: string): IndianStateUT | null { return INDIAN_STATES_UTS.find(state => state.id === id) ?? null; }
+export function getDistrictsByState(stateId: string, query = ''): City[] {
+  const needle = normalize(query);
+  return POSTAL_DISTRICTS.filter((district) => district.stateId === stateId &&
+    (!needle || [district.name, ...district.aliases].some((name) => normalize(name).includes(needle))));
+}
 
 function normalize(value: string): string { return value.normalize('NFKD').toLocaleLowerCase().replace(/\p{M}/gu, '').trim(); }
 export function searchCities(query: string, stateId?: string): City[] {

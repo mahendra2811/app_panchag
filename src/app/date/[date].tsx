@@ -71,8 +71,8 @@ export default function DateDetailScreen() {
 
   return (
     <Page title={t('dayDetails')} subtitle={dateLabel(date, language, devanagariDigits)}>
-      {city ? <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t('calculationUnverified')} tone="warning" />
-        : <Button title={t('selectCity')} onPress={() => router.push('/settings/location')} />}
+      {/* {city ? <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t('calculationUnverified')} tone="warning" />
+        : <Button title={t('selectCity')} onPress={() => router.push('/settings/location')} />} */}
 
       {loading && <AppText tone="muted">{t('loading')}</AppText>}
       {!loading && result && result.status !== 'available' && <StatusState title={t(result.status === 'outside_coverage' ? 'outsideCoverage' : 'dataUnavailable')} description={result.reason} />}

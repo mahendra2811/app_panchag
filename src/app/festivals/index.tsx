@@ -121,7 +121,7 @@ export default function FestivalsScreen() {
             <Chip label={t('allCategories')} selected={category === 'all'} onPress={() => setCategory('all')} />
             {categories.map((entry) => <Chip key={entry} label={t(entry, { defaultValue: entry })} selected={category === entry} onPress={() => setCategory(entry)} />)}
           </View>
-          <SourceBadge label={t('calculationUnverified')} tone="warning" />
+          {/* <SourceBadge label={t('calculationUnverified')} tone="warning" /> */}
           {loading ? <LoadingState label={t('loading')} /> : loadError ? (
             <StatusState title={t('dataUnavailable')} actionLabel={t('retry')} onAction={() => setRevision((value) => value + 1)} />
           ) : filtered.length === 0 ? (

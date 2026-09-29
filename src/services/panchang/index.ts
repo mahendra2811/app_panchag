@@ -38,7 +38,7 @@ export interface PanchangProvenance {
   licencePolicyId: 'panchang-ts-mit-local-v1';
   validUntil: null;
   calculationStatus: 'engine_calculated_unverified';
-  coordinateStatus: 'curated_city_centre';
+  coordinateStatus: 'curated_city_centre' | 'postal_district_approximation';
   ayanamsa: 'lahiri';
   observanceRuleSet: 'panchang-ts-5.4.0-default';
 }
@@ -154,7 +154,8 @@ function normalizeDay(date: CivilDate, city: City, profile: PanchangProfile, pro
     date, contentLanguage: language, cityId: city.id, cityName: city.name, timezone: city.timezone, profile,
     provenance: { providerId: 'panchang-ts', sourceVersion: '5.4.0', schemaVersion: 1, profileId,
       retrievedAt: new Date().toISOString(), licencePolicyId: 'panchang-ts-mit-local-v1', validUntil: null,
-      calculationStatus: 'engine_calculated_unverified', coordinateStatus: 'curated_city_centre',
+      calculationStatus: 'engine_calculated_unverified',
+      coordinateStatus: city.kind === 'district' ? 'postal_district_approximation' : 'curated_city_centre',
       ayanamsa: 'lahiri', observanceRuleSet: 'panchang-ts-5.4.0-default' },
     summaryAtSunrise: { tithiId: activeTithi ? `tithi:${activeTithi.index}` : null,
       tithiName: activeTithi?.name ?? null, pakshaId: activeTithi ? paksha(activeTithi.paksha) : null,

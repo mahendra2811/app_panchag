@@ -93,8 +93,6 @@ function ShellContent({ date, title, children, showDateChooser = true, state }: 
         <PanchangDateChooser
           date={date}
           label={t('date')}
-          buttonLabel={t('goToDate')}
-          invalidDateLabel={t('invalidDate')}
           todayLabel={t('today')}
           onSelect={(next) => router.setParams({ date: next })}
           onToday={() => router.setParams({ date: todayInTimezone() })}
@@ -115,7 +113,8 @@ function ShellContent({ date, title, children, showDateChooser = true, state }: 
           <Card style={styles.sourceCard}>
             <AppText variant="body" weight="700">{t('calculated', { city: visibleDay.cityName })}</AppText>
             <AppText variant="small" tone="muted">{t(visibleDay.profile.monthSystem)} · {visibleDay.timezone}</AppText>
-            <SourceBadge label={t('calculationUnverified')} detail={`panchang-ts ${visibleDay.provenance.sourceVersion}`} tone="warning" />
+            {/* <SourceBadge label={t('calculationUnverified')} detail={`panchang-ts ${visibleDay.provenance.sourceVersion}`} tone="warning" /> */}
+            {visibleDay.provenance.coordinateStatus === 'postal_district_approximation' ? <AppText variant="small" tone="muted">{t('districtApproximation')}</AppText> : null}
             <AppText variant="caption" tone="muted">{t('sourceHint')}</AppText>
           </Card>
           <View style={styles.sections}>{children(visibleDay)}</View>

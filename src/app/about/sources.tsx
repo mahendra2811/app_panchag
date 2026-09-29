@@ -14,11 +14,11 @@ export default function SourcesScreen() {
         <AppText variant="small" tone="muted">{t('sourceVersion')}: 5.4.0</AppText>
         <SourceBadge label={t('localData')} />
         <AppText>{t('sourceCoverage')}</AppText>
-        <AppText variant="small" tone="muted">{t('calculationUnverified')}</AppText>
+        {/* <AppText variant="small" tone="muted">{t('calculationUnverified')}</AppText> */}
       </Card>
       <Card style={{ gap: spacing.sm }}>
         <SectionHeader title={t('festivals')} />
-        <AppText>{t('calculationUnverified')}</AppText>
+        {/* <AppText>{t('calculationUnverified')}</AppText> */}
         <AppText variant="small" tone="muted">{t('sourceHint')}</AppText>
       </Card>
       <Card style={{ gap: spacing.sm }}>

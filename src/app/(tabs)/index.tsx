@@ -143,7 +143,7 @@ export default function HomeScreen() {
         </Card>
       )}
 
-      {!!city && <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t('calculationUnverified')} />}
+      {/* {!!city && <SourceBadge label={t('calculated', { city: language === 'hi' ? city.nameHi : city.name })} detail={t(city.kind === 'district' ? 'districtApproximation' : 'calculationUnverified')} />} */}
 
       <SectionHeader title={t('monthHighlights')} action={<Button title={t('viewAll')} variant="ghost" onPress={() => router.push('/festivals')} />} />
       {highlights.length === 0 ? <AppText tone="muted">{city ? t('noFestivalsInMonth') : t('locationNeeded')}</AppText> : highlights.map(({ date, event }) => (

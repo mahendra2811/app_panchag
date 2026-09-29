@@ -4,5 +4,6 @@ export * from './MonthGrid';
 export * from './WeekStrip';
 export * from './TodayCard';
 export * from './MonthYearPicker';
+export * from './DatePickerField';
 export * from './AgendaDayList';
 export * from './dateMath';
