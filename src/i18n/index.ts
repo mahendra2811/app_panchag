@@ -2,6 +2,7 @@ import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { APP_LANGUAGES, intlLocale, type AppLanguage } from './languages';
 import { regionalTranslations } from './regional';
+import { onboardingTranslations } from './onboarding';
 
 const i18n = createInstance();
 
@@ -505,8 +506,8 @@ const hi: typeof en = {
 
 i18n.use(initReactI18next).init({
   resources: {
-    en: { translation: en }, hi: { translation: hi },
-    ...Object.fromEntries(Object.entries(regionalTranslations).map(([code, translation]) => [code, { translation }])),
+    en: { translation: { ...en, ...onboardingTranslations.en } }, hi: { translation: { ...hi, ...onboardingTranslations.hi } },
+    ...Object.fromEntries(Object.entries(regionalTranslations).map(([code, translation]) => [code, { translation: { ...translation, ...onboardingTranslations[code] } }])),
   },
   lng: 'en',
   fallbackLng: ['en', 'hi'],

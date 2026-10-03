@@ -9,7 +9,16 @@ export type HomeView = 'month' | 'week' | 'today';
 export type MonthSystem = 'purnimanta' | 'amanta';
 export type TextSize = 'small' | 'default' | 'large' | 'extraLarge';
 
+export interface CustomLocation {
+  countryCode: string;
+  state: string;
+  district: string;
+  city: string;
+}
+
 export interface PreferencesState {
+  customLocation: CustomLocation | null;
+  setCustomLocation: (location: CustomLocation | null) => void;
   language: AppLanguage;
   cityId: string | null;
   stateId: string | null;
@@ -42,6 +51,8 @@ export const usePreferences = create<PreferencesState>()(
   persist(
     (set) => ({
       language: initialLanguage,
+      customLocation: null,
+      setCustomLocation: (customLocation) => set({ customLocation, cityId: null, stateId: null }),
       cityId: null,
       stateId: null,
       homeView: 'month',
@@ -54,7 +65,7 @@ export const usePreferences = create<PreferencesState>()(
       onboardingComplete: false,
       hydrated: false,
       setLanguage: (language) => set({ language }),
-      setLocation: (cityId, stateId) => set({ cityId, stateId }),
+      setLocation: (cityId, stateId) => set({ cityId, stateId, customLocation: null }),
       setHomeView: (homeView) => set({ homeView }),
       setMonthSystem: (monthSystem) => set({ monthSystem }),
       setWeekStart: (weekStart) => set({ weekStart }),
@@ -71,6 +82,7 @@ export const usePreferences = create<PreferencesState>()(
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         language: state.language,
+        customLocation: state.customLocation,
         cityId: state.cityId,
         stateId: state.stateId,
         homeView: state.homeView,

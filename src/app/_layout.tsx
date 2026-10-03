@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { getReminder } from '@/features/reminders/repository';
 import i18n from '@/i18n';
@@ -12,8 +13,10 @@ import { colors, radius, spacing, TextScaleProvider } from '@/theme';
 
 export default function RootLayout() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const segments = useSegments();
-  const { language, hydrated, onboardingComplete, notificationsEnabled, textSize } = usePreferences();
+  const { language, hydrated, onboardingComplete, notificationsEnabled, textSize } =
+    usePreferences();
   const [brandIntroReady, setBrandIntroReady] = useState(false);
 
   useEffect(() => {
@@ -41,7 +44,10 @@ export default function RootLayout() {
   }, [hydrated]);
 
   useEffect(() => {
-    if (hydrated) void reconcileNotifications({ language, enabled: notificationsEnabled }).catch(() => undefined);
+    if (hydrated)
+      void reconcileNotifications({ language, enabled: notificationsEnabled }).catch(
+        () => undefined,
+      );
   }, [hydrated, language, notificationsEnabled]);
 
   useEffect(() => {
@@ -51,7 +57,9 @@ export default function RootLayout() {
       const reminder = await getReminder(data.reminderId);
       if (reminder) router.push(`/reminders/${reminder.id}`);
     };
-    void Notifications.getLastNotificationResponseAsync().then((response) => openReminder(response?.notification.request.content.data)).catch(() => undefined);
+    void Notifications.getLastNotificationResponseAsync()
+      .then((response) => openReminder(response?.notification.request.content.data))
+      .catch(() => undefined);
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
       void openReminder(response.notification.request.content.data).catch(() => undefined);
     });
@@ -61,9 +69,15 @@ export default function RootLayout() {
   return (
     <TextScaleProvider value={textSize}>
       <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
+      />
       {(!hydrated || !brandIntroReady) && (
-        <View style={styles.loading} accessibilityRole="progressbar" accessibilityLabel={i18n.t('loading')}>
+        <View
+          style={styles.loading}
+          accessibilityRole="progressbar"
+          accessibilityLabel={i18n.t('loading')}
+        >
           <View style={styles.brand}>
             <View style={styles.logoHalo}>
               <Image
@@ -77,7 +91,7 @@ export default function RootLayout() {
             <View style={styles.divider} />
             <Text style={styles.brandDescription}>पंचांग · तिथि · त्योहार</Text>
           </View>
-          <View style={styles.loadingIndicator}>
+          <View style={[styles.loadingIndicator, { bottom: insets.bottom + spacing.xxxl }]}>
             <ActivityIndicator color={colors.primary} size="small" />
             <Text style={styles.loadingText}>लोड हो रहा है…</Text>
           </View>
