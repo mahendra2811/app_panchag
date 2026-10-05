@@ -4,7 +4,7 @@
     "slug": "hindu-calendar-panchang",
     "platforms": ["android"],
     "scheme": "hinducalendar",
-    "version": "1.0.1",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/panchag-loog-new.png",
     "splash": {
@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "com.pooniya.hinducalendar",
-      "versionCode": 2,
+      "versionCode": 3,
       "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo_without_background.png",
