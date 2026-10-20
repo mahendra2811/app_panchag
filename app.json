@@ -17,7 +17,7 @@
     },
     "android": {
       "package": "com.pooniya.hinducalendar",
-      "versionCode": 4,
+      "versionCode": 5,
       "allowBackup": false,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo_without_background.png",
@@ -43,6 +43,15 @@
           "supportedLocales": {
             "android": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"],
             "ios": ["en", "hi", "bn", "mr", "te", "ta", "gu", "ur", "kn", "or", "ml", "pa"]
+          }
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true
           }
         }
       ]
