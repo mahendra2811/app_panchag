@@ -15,6 +15,7 @@ import { DropdownField } from '@/components/ui/DropdownField';
 import { colors, radius, spacing } from '@/theme';
 import { usePreferences } from '@/store/preferences';
 import { APP_LANGUAGES, type AppLanguage } from '@/i18n/languages';
+import countryNames from '@/data/cities/country-names.json';
 
 // ISO region codes; display names follow the selected interface language.
 const COUNTRY_CODES =
@@ -41,11 +42,11 @@ export default function OnboardingScreen() {
   const [city, setCity] = useState(prefs.customLocation?.city ?? '');
   const [skipped, setSkipped] = useState<string[]>([]);
   const other = { value: 'other', label: t('other') };
-  const names = new Intl.DisplayNames([language], { type: 'region' });
+  // Hermes on Android does not provide Intl.DisplayNames; use bundled locale data.
   const countries = COUNTRY_CODES.map((code) => ({
     value: code,
-    label: names.of(code) ?? code,
-    searchText: `${code} ${new Intl.DisplayNames(['en'], { type: 'region' }).of(code)}`,
+    label: (countryNames[language] as Record<string, string>)[code] ?? code,
+    searchText: `${code} ${(countryNames.en as Record<string, string>)[code] ?? code}`,
   }));
   const isIndia = country === 'IN';
   function skip(field: string) {
