@@ -3,7 +3,7 @@
     "name": "Hindu Calendar - Panchang",
     "slug": "hindu-calendar-panchang",
     "scheme": "hinducalendar",
-    "version": "1.0.0",
+    "version": "1.0.5",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/images/icon.png",
@@ -14,16 +14,14 @@
     },
     "android": {
       "package": "com.pooniya.hinducalendar",
-      "versionCode": 1,
+      "versionCode": 6,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#FFF8EC"
       },
       "edgeToEdgeEnabled": true
     },
-    "plugins": [
-      "expo-router"
-    ],
+    "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true
     }

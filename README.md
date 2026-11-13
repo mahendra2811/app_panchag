@@ -29,7 +29,7 @@ Run these commands from the project root. `npm start` only starts the developmen
 
    The project already has an EAS project ID in `app.json` and a `production` profile in `eas.json`. On the first build, follow the CLI prompts to create or select Android signing credentials. Keep those credentials secure.
 
-3. For an update to an existing Play Store app, increase `expo.android.versionCode` in `app.json` before building. The current value is `1`. Update `expo.version` when the user-facing version changes too.
+3. For an update to an existing Play Store app, use a new `expo.android.versionCode` in `app.json` that is higher than every version already uploaded to Play Console. Update `expo.version` when the user-facing version changes too. If building from an existing local `android/` directory, also update `versionCode` and `versionName` in `android/app/build.gradle`; Expo does not automatically sync app configuration into an existing native project.
 
 4. Create the production Android App Bundle:
 
