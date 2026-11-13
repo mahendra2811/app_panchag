@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import { AppText, Button, Card, SectionHeader, StatusState } from '@/components/ui';
 import { PanchangSection, TimeRangeRow } from '@/components/panchang';
-import { getCityById } from '@/data/cities';
+import { useEffectiveLocation } from '@/features/location/useEffectiveLocation';
 import { isValidCivilDate } from '@/domain/calendar';
 import { clockLabel, dateLabel } from '@/features/calendar/format';
 import { Page } from '@/features/common/Page';
@@ -21,8 +21,9 @@ export default function DateDetailScreen() {
   const params = useLocalSearchParams<{ date: string }>();
   const date = Array.isArray(params.date) ? params.date[0] ?? '' : params.date ?? '';
   const valid = isValidCivilDate(date);
-  const { language, cityId, devanagariDigits } = usePreferences();
-  const city = cityId ? getCityById(cityId) : null;
+  const { language, devanagariDigits } = usePreferences();
+  const { city, fallback, reason, timezone } = useEffectiveLocation();
+  const setLocation = usePreferences((state) => state.setLocation);
   const { day, result, loading } = usePanchangDay(date);
   const [notes, setNotes] = useState<DateNote[]>([]);
   const [noteText, setNoteText] = useState('');
@@ -72,8 +73,10 @@ export default function DateDetailScreen() {
 
   return (
     <Page title={t('dayDetails')} subtitle={dateLabel(date, language, devanagariDigits)}>
+      {fallback && <AppText variant="small" tone="muted">{reason} Using Ujjain, India ({timezone}).</AppText>}
       {loading && <AppText tone="muted">{t('loading')}</AppText>}
       {!loading && result && result.status !== 'available' && <StatusState title={t(result.status === 'outside_coverage' ? 'outsideCoverage' : 'dataUnavailable')} description={result.reason} />}
+      {!loading && result?.status === 'not_supported' && <Button title="Use Ujjain, India instead" variant="secondary" onPress={() => setLocation('ujjain', 'MP')} />}
 
       {day && (
         <>

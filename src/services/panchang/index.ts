@@ -1,5 +1,6 @@
 import { getDailyPanchang } from 'panchang-ts';
-import { addCivilDays, civilDateToISTNoon, compareCivilDates, parseCivilDate, type CivilDate } from '../../domain/calendar';
+import { addCivilDays, compareCivilDates, parseCivilDate, type CivilDate } from '../../domain/calendar';
+import { isTimeZone, wallTimeToInstant } from '../../domain/recurrence';
 import { getCityById, type City } from '../../data/cities';
 import { engineLanguage, type AppLanguage } from '../../i18n/languages';
 
@@ -7,7 +8,7 @@ export type MonthSystem = 'purnimanta' | 'amanta';
 export type FestivalRegion = 'all' | 'tamil-nadu' | 'kerala' | 'karnataka' | 'andhra-pradesh' | 'telangana' |
   'west-bengal' | 'odisha' | 'assam' | 'bihar' | 'jharkhand' | 'gujarat' | 'maharashtra' | 'goa' |
   'rajasthan' | 'punjab' | 'haryana' | 'himachal-pradesh' | 'uttarakhand' | 'uttar-pradesh' | 'madhya-pradesh';
-export interface PanchangProfile { cityId: string; monthSystem: MonthSystem; region: FestivalRegion }
+export interface PanchangProfile { cityId: string; monthSystem: MonthSystem; region: FestivalRegion; timezone?: string }
 export type Availability = 'available' | 'not_loaded' | 'not_supported' | 'no_event' | 'outside_coverage' | 'expired' | 'invalid';
 export interface PanchangPeriod {
   id: string;
@@ -39,7 +40,7 @@ export interface PanchangProvenance {
   licencePolicyId: 'panchang-ts-mit-local-v1';
   validUntil: null;
   calculationStatus: 'engine_calculated_unverified';
-  coordinateStatus: 'curated_city_centre' | 'postal_district_approximation';
+  coordinateStatus: 'curated_city_centre' | 'postal_district_approximation' | 'geonames_city';
   ayanamsa: 'lahiri';
   observanceRuleSet: 'panchang-ts-5.4.0-default';
 }
@@ -48,7 +49,7 @@ export interface PanchangDay {
   contentLanguage: 'en' | 'hi';
   cityId: string;
   cityName: string;
-  timezone: 'Asia/Kolkata';
+  timezone: string;
   profile: PanchangProfile;
   provenance: PanchangProvenance;
   summaryAtSunrise: {
@@ -91,7 +92,9 @@ export type PanchangLoadResult =
 export function createProfileId(profile: PanchangProfile): string | null {
   const city = getCityById(profile.cityId);
   if (!city || !isMonthSystem(profile.monthSystem) || !isFestivalRegion(profile.region)) return null;
-  return `in:${city.id}:${city.latitude.toFixed(4)},${city.longitude.toFixed(4)}:Asia_Kolkata:${profile.monthSystem}:${profile.region}:lahiri:engine-default`;
+  const zone = profile.timezone ?? city.timezone;
+  if (!isTimeZone(zone)) return null;
+  return `${city.countryCode ?? 'IN'}:${city.id}:${city.latitude.toFixed(4)},${city.longitude.toFixed(4)}:${zone}:${profile.monthSystem}:${profile.region}:lahiri:engine-default`;
 }
 
 const REGIONS: readonly FestivalRegion[] = ['all','tamil-nadu','kerala','karnataka','andhra-pradesh','telangana',
@@ -153,11 +156,11 @@ function normalizeDay(date: CivilDate, city: City, profile: PanchangProfile, pro
     { status: 'available' as const, instant: instant(dateValue)!, local: localValue ?? undefined } : { status: 'no_event' as const };
   const activeTithi = source.angas.tithis.find(entry => entry.isActiveAtSunrise) ?? source.angas.tithis[0];
   return {
-    date, contentLanguage: language, cityId: city.id, cityName: city.name, timezone: city.timezone, profile,
+    date, contentLanguage: language, cityId: city.id, cityName: city.name, timezone: profile.timezone ?? city.timezone, profile,
     provenance: { providerId: 'panchang-ts', sourceVersion: '5.4.0', schemaVersion: 1, profileId,
       retrievedAt: new Date().toISOString(), licencePolicyId: 'panchang-ts-mit-local-v1', validUntil: null,
       calculationStatus: 'engine_calculated_unverified',
-      coordinateStatus: city.kind === 'district' ? 'postal_district_approximation' : 'curated_city_centre',
+      coordinateStatus: city.kind === 'district' ? 'postal_district_approximation' : city.geoId ? 'geonames_city' : 'curated_city_centre',
       ayanamsa: 'lahiri', observanceRuleSet: 'panchang-ts-5.4.0-default' },
     summaryAtSunrise: { tithiId: activeTithi ? `tithi:${activeTithi.index}` : null,
       tithiName: activeTithi?.name ?? null, pakshaId: activeTithi ? paksha(activeTithi.paksha) : null,
@@ -189,9 +192,20 @@ export async function loadPanchangDay(date: CivilDate | string, profile: Panchan
   if (cached) return { status: 'available', day: cached };
   await new Promise<void>(resolve => setTimeout(resolve,0));
   try {
-    const instant = civilDateToISTNoon(date)!;
+    const zone = profile.timezone ?? city.timezone;
+    const instant = wallTimeToInstant(date as CivilDate, '12:00', zone);
+    // The engine uses one offset per sunrise-to-sunrise day. Suppress calculations
+    // around clock changes instead of showing times with the wrong offset.
+    const offsetAt = (value: Date) => {
+      const parts = new Intl.DateTimeFormat('en-US', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(value);
+      const field = (type: string) => Number(parts.find((part) => part.type === type)?.value);
+      return Date.UTC(field('year'), field('month') - 1, field('day'), field('hour'), field('minute')) - value.getTime();
+    };
+    if (offsetAt(new Date(instant.getTime() - 24 * 3600000)) !== offsetAt(new Date(instant.getTime() + 36 * 3600000))) {
+      return { status: 'not_supported', day: null, reason: 'Panchang is unavailable near a daylight saving time change for this location.' };
+    }
     const result = getDailyPanchang(instant,{latitude:city.latitude,longitude:city.longitude},
-      {timezone:330,masaSystem:profile.monthSystem,region:profile.region,ayanamsa:'lahiri',language:calculationLanguage});
+      {timezone:zone,masaSystem:profile.monthSystem,region:profile.region,ayanamsa:'lahiri',language:calculationLanguage});
     if (!result) return { status: 'not_supported', day: null, reason: 'The engine could not form a sunrise-to-sunrise day for this location.' };
     const day = normalizeDay(date as CivilDate,city,profile,profileId,calculationLanguage,result);
     cache.set(`${profileId}:${date}:${calculationLanguage}`,day);

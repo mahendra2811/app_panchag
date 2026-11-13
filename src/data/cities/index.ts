@@ -1,5 +1,6 @@
 /** Curated city points plus approximate postal-district points for offline location selection. */
 import postalDistrictRows from './postal-districts.json';
+import { getWorldCity } from '../world';
 
 export interface IndianStateUT { id: string; name: string; nameHi: string; kind: 'state' | 'union_territory' }
 export interface City {
@@ -9,7 +10,9 @@ export interface City {
   stateId: string;
   latitude: number;
   longitude: number;
-  timezone: 'Asia/Kolkata';
+  timezone: string;
+  countryCode?: string;
+  geoId?: string;
   aliases: readonly string[];
   kind: 'city' | 'district';
 }
@@ -131,7 +134,26 @@ export const POSTAL_DISTRICTS: readonly City[] = postalDistrictRows.map(([id,nam
 }));
 const CITY_BY_ID = new Map([...INDIAN_CITIES, ...POSTAL_DISTRICTS].map(city => [city.id,city]));
 
-export function getCityById(id: string): City | null { return CITY_BY_ID.get(id) ?? null; }
+// GeoNames admin1 codes, checked against admin1CodesASCII.txt. Unknown codes
+// deliberately resolve to no state; they must not acquire the wrong festival region.
+const INDIA_GEONAMES_ADMIN1: Record<string, string> = {
+  '01': 'AN', '02': 'AP', '03': 'AS', '05': 'CH', '07': 'DL', '09': 'GJ',
+  '10': 'HR', '11': 'HP', '12': 'JK', '13': 'KL', '14': 'LD', '16': 'MH',
+  '17': 'MN', '18': 'ML', '19': 'KA', '20': 'NL', '21': 'OD', '22': 'PY',
+  '23': 'PB', '24': 'RJ', '25': 'TN', '26': 'TR', '28': 'WB', '29': 'SK',
+  '30': 'AR', '31': 'MZ', '33': 'GA', '34': 'BR', '35': 'MP', '36': 'UP',
+  '37': 'CG', '38': 'JH', '39': 'UK', '40': 'TS', '41': 'LA', '52': 'DH',
+};
+
+export function getCityById(id: string): City | null {
+  const existing = CITY_BY_ID.get(id);
+  if (existing) return existing;
+  if (!id.startsWith('gn:')) return null;
+  const city = getWorldCity(id);
+  return city ? { id: `gn:${city.id}`, name: city.name, nameHi: city.name, stateId: city.countryCode === 'IN' ? (INDIA_GEONAMES_ADMIN1[city.adminCode] ?? '') : city.adminCode,
+    latitude: city.latitude, longitude: city.longitude, timezone: city.timezone,
+    countryCode: city.countryCode, geoId: city.id, aliases: city.asciiName ? [city.asciiName] : [], kind: 'city' } : null;
+}
 export function getStateById(id: string): IndianStateUT | null { return INDIAN_STATES_UTS.find(state => state.id === id) ?? null; }
 export function getDistrictsByState(stateId: string, query = ''): City[] {
   const needle = normalize(query);

@@ -10,13 +10,15 @@ import { Page } from '@/features/common/Page';
 import { localizeDigits } from '@/i18n';
 import { usePreferences } from '@/store/preferences';
 import { colors, radius, spacing } from '@/theme';
+import { usePanchangProfile } from '@/features/panchang/usePanchang';
 
 export default function HolidaysScreen() {
   const { t } = useTranslation();
   const language = usePreferences((state) => state.language);
   const devanagariDigits = usePreferences((state) => state.devanagariDigits);
   const stateId = usePreferences((state) => state.stateId);
-  const [year, setYear] = useState(Number(todayInTimezone().slice(0, 4)));
+  const profile = usePanchangProfile();
+  const [year, setYear] = useState(Number(todayInTimezone(profile.timezone).slice(0, 4)));
   const [jurisdiction, setJurisdiction] = useState<string | null>(stateId);
   const [pickerVisible, setPickerVisible] = useState(false);
   const [search, setSearch] = useState('');

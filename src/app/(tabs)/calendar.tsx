@@ -1,12 +1,13 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
 import { AgendaDayList, CalendarHeader, DatePickerField, MonthGrid, MonthYearPicker } from '@/components/calendar';
 import type { CalendarDayData } from '@/components/calendar';
 import { AppText, Button, Card, Screen, SectionHeader } from '@/components/ui';
-import { getCityById } from '@/data/cities';
+import { useEffectiveLocation } from '@/features/location/useEffectiveLocation';
+import { shouldFollowToday } from '@/features/calendar/followToday';
 import { formatCivilDate, getMonthGrid, parseCivilDate } from '@/domain/calendar';
 import { compactTithiParts, dateLabel, monthLabel } from '@/features/calendar/format';
 import { useCalendarDatePress } from '@/features/calendar/useCalendarDatePress';
@@ -22,14 +23,23 @@ export default function CalendarScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const today = useToday();
-  const { language, cityId, simpleMode, textSize, weekStart, devanagariDigits } = usePreferences();
+  const { language, simpleMode, textSize, weekStart, devanagariDigits } = usePreferences();
   const profile = usePanchangProfile();
   const [selectedDate, setSelectedDate] = useState<string>(today);
   const [year, setYear] = useState(Number(today.slice(0, 4)));
   const [month, setMonth] = useState(Number(today.slice(5, 7)));
+  const previousToday = useRef(today);
+  useEffect(() => {
+    if (shouldFollowToday(selectedDate, previousToday.current, today)) {
+      setSelectedDate(today);
+      setYear(Number(today.slice(0, 4)));
+      setMonth(Number(today.slice(5, 7)));
+    }
+    previousToday.current = today;
+  }, [today, selectedDate]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { days, loadedCount, totalCount, loading } = useMonthSummary(year, month, profile, language);
-  const city = cityId ? getCityById(cityId) : null;
+  const { city, fallback, reason } = useEffectiveLocation();
 
   const markers = useMemo(() => {
     const next: Record<string, CalendarDayData> = {};
@@ -68,6 +78,7 @@ export default function CalendarScreen() {
 
   return (
     <Screen>
+      {fallback && <AppText variant="small" tone="muted">{reason} Using Ujjain, India ({profile.timezone}). Change location in settings.</AppText>}
       <AppText variant="title" weight="700">{t('calendar')}</AppText>
       <AppText tone="muted" variant="small">{t('selectDateHint')}</AppText>
       <View style={styles.searchRow}>
