@@ -31,7 +31,7 @@ export default function FestivalsScreen() {
   const profile = usePanchangProfile();
   const language = usePreferences((state) => state.language);
   const devanagariDigits = usePreferences((state) => state.devanagariDigits);
-  const now = todayInTimezone();
+  const now = todayInTimezone(profile.timezone);
   const [year, setYear] = useState(Number(now.slice(0, 4)));
   const [month, setMonth] = useState(Number(now.slice(5, 7)));
   const [pickerVisible, setPickerVisible] = useState(false);
@@ -85,7 +85,7 @@ export default function FestivalsScreen() {
     setYear(nextYear);
     setMonth(next % 12 + 1);
   };
-  const goToday = () => { const today = todayInTimezone(); setYear(Number(today.slice(0, 4))); setMonth(Number(today.slice(5, 7))); };
+  const goToday = () => { const today = todayInTimezone(profile.timezone); setYear(Number(today.slice(0, 4))); setMonth(Number(today.slice(5, 7))); };
   const title = `${MONTH_NAMES[language][month - 1]} ${localizeDigits(year, language, devanagariDigits)}`;
 
   return (

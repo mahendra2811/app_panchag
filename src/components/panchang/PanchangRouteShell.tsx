@@ -12,12 +12,19 @@ import { intlLocale, type AppLanguage } from '@/i18n/languages';
 import { loadPanchangDay, type PanchangDay, type PanchangLoadResult, type PanchangProfile } from '@/services/panchang';
 import { usePreferences } from '@/store/preferences';
 import { spacing } from '@/theme';
+import { resolveEffectiveLocation } from '@/features/location/effective';
+import { useEffectiveLocation } from '@/features/location/useEffectiveLocation';
 import { PanchangDateChooser } from './PanchangDateChooser';
+
+function selectedTimeZone(): string {
+  const state = usePreferences.getState();
+  return resolveEffectiveLocation(state.cityId, state.timeZoneOverride).timezone;
+}
 
 export function resolvePanchangDate(param: string | string[] | undefined): string {
   if (typeof param === 'string') return param;
   if (Array.isArray(param)) return param[0] ?? '';
-  return todayInTimezone();
+  return todayInTimezone(selectedTimeZone());
 }
 
 export function formatPanchangDate(date: string, language: AppLanguage, devanagariDigits = false): string {
@@ -36,7 +43,7 @@ export function formatPanchangInstant(instant: string | null, language: AppLangu
   if (!Number.isFinite(value.getTime())) return undefined;
   const label = new Intl.DateTimeFormat(intlLocale(language), {
     ...(withDate ? { day: 'numeric' as const, month: 'short' as const } : {}),
-    hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata',
+    hour: 'numeric', minute: '2-digit', hour12: true, timeZone: selectedTimeZone(),
   }).format(value);
   return localizeDigits(label, language, devanagariDigits);
 }
@@ -49,7 +56,7 @@ export type PanchangRouteShellProps = {
   profileOverride?: PanchangProfile;
 };
 
-type DayViewState = ReturnType<typeof usePanchangDay>;
+type DayViewState = Omit<ReturnType<typeof usePanchangDay>, 'profile'> & { profile: PanchangProfile | null };
 
 export function PanchangRouteShell(props: PanchangRouteShellProps) {
   return props.profileOverride ? <OverrideProfileShell {...props} profileOverride={props.profileOverride} /> : <SavedProfileShell {...props} />;
@@ -79,34 +86,39 @@ function OverrideProfileShell(props: PanchangRouteShellProps & { profileOverride
   return <ShellContent {...props} state={state} />;
 }
 
-function ShellContent({ date, title, children, showDateChooser = true, state }: PanchangRouteShellProps & { state: DayViewState }) {
+function ShellContent({ date, title, children, showDateChooser = true, profileOverride, state }: PanchangRouteShellProps & { state: DayViewState }) {
   const router = useRouter();
   const { t } = useTranslation();
   const language = usePreferences((state) => state.language);
   const devanagariDigits = usePreferences((state) => state.devanagariDigits);
+  const setLocation = usePreferences((state) => state.setLocation);
+  const effective = useEffectiveLocation();
   const { profile, day, result, loading, reload } = state;
   const dateLabel = formatPanchangDate(date, language, devanagariDigits);
-  const visibleDay = day && profile && day.date === date && day.profile.cityId === profile.cityId && day.profile.monthSystem === profile.monthSystem && day.profile.region === profile.region ? day : null;
+  const visibleDay = day && profile && day.date === date && day.profile.cityId === profile.cityId && day.profile.monthSystem === profile.monthSystem && day.profile.region === profile.region && day.profile.timezone === profile.timezone ? day : null;
   return (
     <Page title={title} subtitle={dateLabel}>
+      {!profileOverride && effective.fallback && <AppText variant="small" tone="muted">{effective.reason} Using Ujjain, India ({effective.timezone}).</AppText>}
       {showDateChooser ? (
         <PanchangDateChooser
           date={date}
           label={t('date')}
           todayLabel={t('today')}
           onSelect={(next) => router.setParams({ date: next })}
-          onToday={() => router.setParams({ date: todayInTimezone() })}
+          onToday={() => router.setParams({ date: todayInTimezone(selectedTimeZone()) })}
         />
       ) : null}
       {!profile ? <StatusState title={t('locationNeeded')} actionLabel={t('selectCity')} onAction={() => router.push('/settings/location')} /> : null}
       {profile && loading ? <LoadingState label={t('loading')} /> : null}
       {profile && !loading && result && result.status !== 'available' ? (
-        <StatusState
+        <><StatusState
           title={result.status === 'outside_coverage' ? t('outsideCoverage') : result.status === 'not_supported' ? t('notSupported') : result.status === 'invalid' ? t('invalidDate') : t('dataUnavailable')}
-          description={t('sourceHint')}
+          description={result.reason}
           actionLabel={t('retry')}
           onAction={reload}
         />
+        {!profileOverride && result.status === 'not_supported' && <Button title="Use Ujjain, India instead" variant="secondary" onPress={() => setLocation('ujjain', 'MP')} />}
+        </>
       ) : null}
       {visibleDay ? (
         <>

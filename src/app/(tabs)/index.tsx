@@ -1,6 +1,6 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { MapPin, Search } from 'lucide-react-native';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -15,7 +15,8 @@ import {
 import type { CalendarDayData } from '@/components/calendar';
 import { AppText, Button, Card, IconButton, Screen, SectionHeader } from '@/components/ui';
 import { LocationPickerModal } from '@/components/location/LocationPickerModal';
-import { getCityById } from '@/data/cities';
+import { useEffectiveLocation } from '@/features/location/useEffectiveLocation';
+import { shouldFollowToday } from '@/features/calendar/followToday';
 import {
   addCivilDays,
   daysInMonth,
@@ -40,7 +41,7 @@ export default function HomeScreen() {
   const today = useToday();
   const {
     language,
-    cityId,
+    setLocation,
     homeView,
     setHomeView,
     simpleMode,
@@ -54,11 +55,19 @@ export default function HomeScreen() {
     year: Number(today.slice(0, 4)),
     month: Number(today.slice(5, 7)),
   }));
+  const previousToday = useRef(today);
+  useEffect(() => {
+    if (shouldFollowToday(selectedDate, previousToday.current, today)) {
+      setSelectedDate(today);
+      setDisplayMonth({ year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) });
+    }
+    previousToday.current = today;
+  }, [today, selectedDate]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [locationPickerOpen, setLocationPickerOpen] = useState(false);
   const [reminderCounts, setReminderCounts] = useState<Record<string, number>>({});
-  const { day: selectedDay, loading: dayLoading } = usePanchangDay(selectedDate);
-  const city = cityId ? getCityById(cityId) : null;
+  const { day: selectedDay, loading: dayLoading, result: dayResult } = usePanchangDay(selectedDate);
+  const { city, fallback, reason } = useEffectiveLocation();
   const { days: monthDays } = useMonthSummary(
     displayMonth.year,
     displayMonth.month,
@@ -164,6 +173,7 @@ export default function HomeScreen() {
 
   return (
     <Screen>
+      {fallback && <AppText variant="small" tone="muted">{reason} Using Ujjain, India ({profile.timezone}). Change location in settings.</AppText>}
       <View style={styles.topLine}>
         <View style={styles.topText}>
           <Image
@@ -284,6 +294,8 @@ export default function HomeScreen() {
           onOpen={() => router.push(`/date/${selectedDate}`)}
         />
       )}
+      {homeView === 'today' && dayResult && dayResult.status !== 'available' && <AppText tone="muted">{dayResult.reason}</AppText>}
+      {dayResult?.status === 'not_supported' && <Button title="Use Ujjain, India instead" variant="secondary" onPress={() => setLocation('ujjain', 'MP')} />}
 
       {homeView !== 'today' && (
         <Card style={styles.selectedCard}>
@@ -304,7 +316,7 @@ export default function HomeScreen() {
                   .join(' · ')}
               </AppText>
             ) : (
-              <AppText tone="muted">{t('dataUnavailable')}</AppText>
+              <AppText tone="muted">{dayResult && dayResult.status !== 'available' ? dayResult.reason : t('dataUnavailable')}</AppText>
             )
           ) : (
             <AppText tone="muted">{t('locationNeeded')}</AppText>

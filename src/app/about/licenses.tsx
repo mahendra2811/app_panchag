@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { AppText, Card, SectionHeader } from '@/components/ui';
 import { Page } from '@/features/common/Page';
 import { spacing } from '@/theme';
+import { UNICODE_LICENSE } from '@/data/world/unicode-license';
 
 const PANCHANG_TS_MIT_NOTICE = `MIT License
 
@@ -38,6 +39,11 @@ export default function LicensesScreen() {
         <AppText variant="small" selectable>
           {'All India Pincode JSON API © 2026 Aniket Thapa. Licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). Offline district names and approximate coordinates are derived from this source. Changes: district labels normalized and representative coordinates calculated from postal office points. Source: https://aniket-thapa.github.io/india-pincode-api/ · Licence: https://creativecommons.org/licenses/by-nc/4.0/'}
         </AppText>
+      </Card>
+      <Card style={{ gap: spacing.sm }}>
+        <SectionHeader title="Offline location data" />
+        <AppText variant="small" selectable>{'City data © GeoNames contributors, https://www.geonames.org/; licensed under Creative Commons Attribution 4.0: https://creativecommons.org/licenses/by/4.0/. The dataset has been filtered, reduced and reorganized. Country names derived from Unicode CLDR (Unicode, Inc.): https://unicode.org/copyright.html. Unicode License V3: https://www.unicode.org/license.txt.'}</AppText>
+        <AppText variant="small" selectable>{UNICODE_LICENSE}</AppText>
       </Card>
       <Card style={{ gap: spacing.sm }}>
         <SectionHeader title={t('licenceLibraries')} />

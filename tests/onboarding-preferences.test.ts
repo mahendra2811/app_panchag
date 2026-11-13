@@ -25,6 +25,18 @@ test('onboarding can finish with location skipped', () => {
   expect(usePreferences.getState().cityId).toBeNull();
 });
 
+test('changing timezone repairs an unavailable saved city and keeps the requested zone', () => {
+  usePreferences.setState({ cityId: 'gn:999999999', stateId: '', selectedLocation: null, timeZoneOverride: null });
+  usePreferences.getState().setTimeZoneOverride('America/New_York');
+  expect(usePreferences.getState()).toMatchObject({ cityId: 'ujjain', stateId: 'MP', timeZoneOverride: 'America/New_York' });
+  expect(usePreferences.getState().selectedLocation).toMatchObject({ countryCode: 'IN', timezone: 'Asia/Kolkata' });
+});
+
+test('selecting an Indian GeoNames city stores its mapped state', () => {
+  usePreferences.getState().setLocation('gn:1264527', ''); // Chennai, GeoNames admin1 25
+  expect(usePreferences.getState().stateId).toBe('TN');
+});
+
 test.each(APP_LANGUAGES.map((item) => item.code))('new form labels are present in %s', (code) => {
   for (const key of [
     'country',

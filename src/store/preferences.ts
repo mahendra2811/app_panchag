@@ -3,6 +3,7 @@ import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { isAppLanguage, type AppLanguage } from '@/i18n/languages';
+import { getCityById } from '@/data/cities';
 
 export type { AppLanguage } from '@/i18n/languages';
 export type HomeView = 'month' | 'week' | 'today';
@@ -17,6 +18,9 @@ export interface CustomLocation {
 }
 
 export interface PreferencesState {
+  selectedLocation: { countryCode: string; geographicId: string | null; latitude: number; longitude: number; timezone: string } | null;
+  timeZoneOverride: string | null;
+  setTimeZoneOverride: (zone: string | null) => void;
   customLocation: CustomLocation | null;
   setCustomLocation: (location: CustomLocation | null) => void;
   language: AppLanguage;
@@ -49,10 +53,18 @@ const initialLanguage: AppLanguage = isAppLanguage(deviceLanguage) ? deviceLangu
 
 export const usePreferences = create<PreferencesState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
+      selectedLocation: null,
+      timeZoneOverride: null,
+      setTimeZoneOverride: (timeZoneOverride) => {
+        const cityId = get().cityId;
+        // Repair an unavailable saved city before applying a deliberate time-zone change.
+        if (cityId && !getCityById(cityId)) get().setLocation('ujjain', 'MP');
+        set({ timeZoneOverride });
+      },
       language: initialLanguage,
       customLocation: null,
-      setCustomLocation: (customLocation) => set({ customLocation, cityId: null, stateId: null }),
+      setCustomLocation: (customLocation) => set({ customLocation, cityId: null, stateId: null, selectedLocation: null, timeZoneOverride: null }),
       cityId: null,
       stateId: null,
       homeView: 'month',
@@ -65,7 +77,13 @@ export const usePreferences = create<PreferencesState>()(
       onboardingComplete: false,
       hydrated: false,
       setLanguage: (language) => set({ language }),
-      setLocation: (cityId, stateId) => set({ cityId, stateId, customLocation: null }),
+      setLocation: (cityId, stateId) => {
+        const city = getCityById(cityId);
+        const resolvedStateId = city?.geoId && city.countryCode === 'IN' ? city.stateId : stateId;
+        set({ cityId, stateId: resolvedStateId, customLocation: null, timeZoneOverride: null,
+          selectedLocation: city ? { countryCode: city.countryCode ?? 'IN', geographicId: city.geoId ?? null,
+            latitude: city.latitude, longitude: city.longitude, timezone: city.timezone } : null });
+      },
       setHomeView: (homeView) => set({ homeView }),
       setMonthSystem: (monthSystem) => set({ monthSystem }),
       setWeekStart: (weekStart) => set({ weekStart }),
@@ -83,6 +101,8 @@ export const usePreferences = create<PreferencesState>()(
       partialize: (state) => ({
         language: state.language,
         customLocation: state.customLocation,
+        selectedLocation: state.selectedLocation,
+        timeZoneOverride: state.timeZoneOverride,
         cityId: state.cityId,
         stateId: state.stateId,
         homeView: state.homeView,

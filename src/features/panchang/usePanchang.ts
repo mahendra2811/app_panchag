@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getCityById } from '@/data/cities';
 import { loadPanchangDay, type FestivalRegion, type PanchangLoadResult, type PanchangProfile } from '@/services/panchang';
 import { usePreferences } from '@/store/preferences';
+import { resolveEffectiveLocation } from '@/features/location/effective';
 
 const REGIONS: Record<string, FestivalRegion> = {
   AP: 'andhra-pradesh', AS: 'assam', BR: 'bihar', GA: 'goa', GJ: 'gujarat', HR: 'haryana',
@@ -11,11 +11,12 @@ const REGIONS: Record<string, FestivalRegion> = {
   TS: 'telangana', UP: 'uttar-pradesh', UK: 'uttarakhand', WB: 'west-bengal',
 };
 
-export function usePanchangProfile(): PanchangProfile | null {
-  const { cityId, stateId, monthSystem } = usePreferences();
-  return useMemo(() => cityId && getCityById(cityId)
-    ? { cityId, monthSystem, region: REGIONS[stateId ?? ''] ?? 'all' }
-    : null, [cityId, stateId, monthSystem]);
+export function usePanchangProfile(): PanchangProfile & { timezone: string } {
+  const { cityId, stateId, monthSystem, timeZoneOverride } = usePreferences();
+  return useMemo(() => {
+    const { city, timezone, fallback } = resolveEffectiveLocation(cityId, timeZoneOverride);
+    return { cityId: city.id, monthSystem, timezone, region: !fallback && (city.countryCode ?? 'IN') === 'IN' ? (REGIONS[stateId || city.stateId] ?? 'all') : 'all' };
+  }, [cityId, stateId, monthSystem, timeZoneOverride]);
 }
 
 export function usePanchangDay(date: string) {

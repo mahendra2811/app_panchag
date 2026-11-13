@@ -9,26 +9,21 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { INDIAN_STATES_UTS, getCityById, getDistrictsByState, getStateById } from '@/data/cities';
+import { INDIAN_STATES_UTS, getCityById, getDistrictsByState } from '@/data/cities';
 import { AppText, Button, Screen } from '@/components/ui';
 import { DropdownField } from '@/components/ui/DropdownField';
 import { colors, radius, spacing } from '@/theme';
 import { usePreferences } from '@/store/preferences';
 import { APP_LANGUAGES, type AppLanguage } from '@/i18n/languages';
-import countryNames from '@/data/cities/country-names.json';
-
-// ISO region codes; display names follow the selected interface language.
-const COUNTRY_CODES =
-  'IN AF AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BS BH BD BB BY BE BZ BJ BM BT BO BQ BA BW BV BR IO BN BG BF BI CV KH CM CA KY CF TD CL CN CX CC CO KM CG CD CK CR CI HR CU CW CY CZ DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF TF GA GM GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM VA HN HK HU IS ID IR IQ IE IM IL IT JM JP JE JO KZ KE KI KP KR KW KG LA LV LB LS LR LY LI LT LU MO MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA RE RO RU RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS SS ES LK SD SR SJ SE CH SY TW TJ TZ TH TL TG TK TO TT TN TR TM TC TV UG UA AE GB US UM UY UZ VU VE VN VG VI WF EH YE ZM ZW'.split(
-    ' ',
-  );
+import { COUNTRIES, getWorldCities } from '@/data/world';
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const prefs = usePreferences();
   const { language, setLanguage } = prefs;
-  const [country, setCountry] = useState(prefs.customLocation?.countryCode ?? 'IN');
+  const [country, setCountry] = useState(prefs.selectedLocation?.countryCode ?? prefs.customLocation?.countryCode ?? 'IN');
+  const [worldCity, setWorldCity] = useState(prefs.cityId?.startsWith('gn:') ? prefs.cityId : '');
   const [state, setState] = useState(
     prefs.stateId ??
       INDIAN_STATES_UTS.find((item) => item.name === prefs.customLocation?.state)?.id ??
@@ -42,12 +37,7 @@ export default function OnboardingScreen() {
   const [city, setCity] = useState(prefs.customLocation?.city ?? '');
   const [skipped, setSkipped] = useState<string[]>([]);
   const other = { value: 'other', label: t('other') };
-  // Hermes on Android does not provide Intl.DisplayNames; use bundled locale data.
-  const countries = COUNTRY_CODES.map((code) => ({
-    value: code,
-    label: (countryNames[language] as Record<string, string>)[code] ?? code,
-    searchText: `${code} ${(countryNames.en as Record<string, string>)[code] ?? code}`,
-  }));
+  const countries = COUNTRIES.map(({ code, name }) => ({ value: code, label: name, searchText: code }));
   const isIndia = country === 'IN';
   function skip(field: string) {
     setSkipped((previous) => [...previous, field]);
@@ -92,19 +82,16 @@ export default function OnboardingScreen() {
     );
   }
   function complete() {
-    if (skipped.includes('country') || skipped.includes('state') || skipped.includes('district')) {
-      prefs.setCustomLocation(null);
+    if (worldCity && !skipped.includes('country')) {
+      prefs.setLocation(worldCity, '');
+    } else if (skipped.includes('country') || skipped.includes('state') || skipped.includes('district')) {
+      prefs.setLocation('ujjain', 'MP');
     } else if (isIndia && state && district && district !== 'other') {
       prefs.setLocation(district, state);
     } else if (country && (customState.trim() || state || customDistrict.trim() || city.trim())) {
-      prefs.setCustomLocation({
-        countryCode: country,
-        state: isIndia ? (getStateById(state)?.name ?? '') : customState.trim(),
-        district: customDistrict.trim(),
-        city: skipped.includes('city') ? '' : city.trim(),
-      });
+      prefs.setLocation('ujjain', 'MP');
     } else {
-      prefs.setCustomLocation(null);
+      prefs.setLocation('ujjain', 'MP');
     }
     prefs.finishOnboarding();
     router.replace('/(tabs)');
@@ -143,6 +130,7 @@ export default function OnboardingScreen() {
             options={countries}
             onChange={(value) => {
               setCountry(value);
+              setWorldCity('');
               setState('');
               setDistrict('');
               setCustomState('');
@@ -154,7 +142,16 @@ export default function OnboardingScreen() {
             }}
           />,
         )}
-        {field(
+        {!skipped.includes('country') && (
+          <View style={styles.group}>
+            <AppText variant="small" weight="600">{t('city')}</AppText>
+            <DropdownField label={t('city')} value={worldCity}
+              options={getWorldCities(country).map((item) => ({ value: `gn:${item.id}`, label: `${item.name}${item.adminCode ? ` (${item.adminCode})` : ''} · ${item.timezone}`, searchText: item.asciiName }))}
+              onChange={(value) => { setWorldCity(value); setState(''); setDistrict(''); }} />
+            <AppText variant="small" tone="muted">Choose a major city here, or use the Indian state and district fields below. If no location is selected, Ujjain, India is used.</AppText>
+          </View>
+        )}
+        {isIndia && field(
           t('state'),
           'state',
           !!(isIndia ? state : customState.trim()),
@@ -169,6 +166,7 @@ export default function OnboardingScreen() {
                 searchText: `${item.name} ${item.nameHi}`,
               }))}
               onChange={(value) => {
+                setWorldCity('');
                 setState(value);
                 setDistrict('');
                 setCustomDistrict('');
@@ -178,7 +176,7 @@ export default function OnboardingScreen() {
             input(t('enterState'), customState, setCustomState)
           ),
         )}
-        {field(
+        {isIndia && field(
           t('district'),
           'district',
           !!(isIndia && district !== 'other' ? district : customDistrict.trim()),
@@ -209,7 +207,7 @@ export default function OnboardingScreen() {
               input(t('enterDistrict'), customDistrict, setCustomDistrict)}
           </>,
         )}
-        {(!isIndia || district === 'other') &&
+        {isIndia && district === 'other' &&
           field(t('city'), 'city', !!city.trim(), input(t('enterCity'), city, setCity))}
         {field(
           t('appearance'),
@@ -232,6 +230,7 @@ export default function OnboardingScreen() {
             </View>
           </View>,
         )}
+        <AppText variant="small" tone="muted">If a location cannot be selected, Ujjain, India (Asia/Kolkata) is used. Change it any time in settings.</AppText>
         <Button title={t('start')} fullWidth onPress={complete} />
       </KeyboardAvoidingView>
     </Screen>
